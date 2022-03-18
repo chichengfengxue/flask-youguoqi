@@ -1,3 +1,4 @@
+{% if current_user.is_authenticated %}
 <div class="card bg-light mb-3 w-100 sidebar-nav">
     <div class="card-body">
         <div class="row">
@@ -20,6 +21,7 @@
         </a>
     </div>
 </div>
+{% endif %}
 <div class="card bg-light mb-3 w-100">
     <div class="card-header">Hot Tags</div>
     <div class="list-group">

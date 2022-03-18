@@ -7,14 +7,7 @@ from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 from flask_whooshee import Whooshee
 from flask_wtf import CSRFProtect
-from flask_apscheduler import APScheduler as _BaseAPScheduler
-
-
-class APScheduler(_BaseAPScheduler):
-    """重写APScheduler，实现上下文管理机制，小优化功能也可以不要。对于任务函数涉及数据库操作有用"""
-    def run_job(self, id, jobstore=None):
-        with self.app.app_context():
-            super().run_job(id=id, jobstore=jobstore)
+from flask_socketio import SocketIO
 
 
 bootstrap = Bootstrap()
@@ -26,8 +19,7 @@ moment = Moment()
 whooshee = Whooshee()
 avatars = Avatars()
 csrf = CSRFProtect()
-# scheduler = APScheduler()
-# scheduler.start()
+socketio = SocketIO()
 
 
 @login_manager.user_loader

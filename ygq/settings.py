@@ -41,6 +41,8 @@ class BaseConfig:
     YGQ_MANAGE_TAG_PER_PAGE = 50
     YGQ_MANAGE_COMMENT_PER_PAGE = 30
     YGQ_SEARCH_RESULT_PER_PAGE = 20
+    YGQ_MESSAGE_PER_PAGE = 30
+
 
     # 图片上传
     YGQ_UPLOAD_PATH = os.path.join(basedir, 'uploads')

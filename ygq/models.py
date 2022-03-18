@@ -52,7 +52,8 @@ class User(db.Model, UserMixin):
 
     shops = db.relationship('Shop', back_populates='user', cascade='all')
     rider = db.relationship('Rider', back_populates='user', cascade='all')
-    orders = db.relationship('Order', back_populates='consumer')
+    orders = db.relationship('Order', back_populates='consumer', cascade='all')
+    messages = db.relationship('Message', back_populates='author', cascade='all')
     comments = db.relationship('Comment', back_populates='author', cascade='all')
     notifications = db.relationship('Notification', back_populates='receiver', cascade='all')
     files = db.relationship('File', back_populates='user', cascade='all')
@@ -194,6 +195,8 @@ class Dish(db.Model):
     collectors = db.relationship('Collect', back_populates='collected', cascade='all')
     tags = db.relationship('Tag', secondary=tagging, back_populates='dishes')
     sales = db.Column(db.Integer, default=0)
+    messages = db.relationship('Message', back_populates='dish', cascade='all')
+
 
 
 @whooshee.register_model('name')
@@ -238,6 +241,16 @@ class Notification(db.Model):
 
     receiver_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 接收者
     receiver = db.relationship('User', back_populates='notifications')
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    author = db.relationship('User', back_populates='messages')
+    dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
+    dish = db.relationship('Dish', back_populates='messages')
 
 
 @db.event.listens_for(User, 'after_delete', named=True)

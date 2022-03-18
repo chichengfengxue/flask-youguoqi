@@ -4,7 +4,6 @@ from flask_login import login_required, current_user, fresh_login_required
 from ..decorators import confirm_required
 from ..emails import send_change_email_email
 from ..extensions import db, avatars
-# from ..extensions import scheduler
 from ..forms.user import EditProfileForm, UploadAvatarForm, CropAvatarForm, ChangeEmailForm, \
     ChangePasswordForm, DeleteAccountForm, EditOrder
 from ..models import User, Rider, Dish, Order, Collect
@@ -64,7 +63,6 @@ def buy(dish_id):
 
         push_new_order_notification(order, order.rider.user)
         push_new_order_notification(order, order.shop.user)
-        # scheduler.add_job(func=push_delivered_notification(), trigger="date", run_date=order.time, timezone="Asia/Shanghai")
         return redirect(url_for('.show_order', order_id=order.id))
     form.location_x.data = user.location_x
     form.location_y.data = user.location_y
@@ -75,9 +73,10 @@ def buy(dish_id):
 @login_required
 def show_order(order_id):
     order = Order.query.get_or_404(order_id)
-    # if current_user == order.shop.user or current_user == order.rider.user or current_user == order.consumer:
-    #     abort(403)
-    return render_template('user/show_order.html', order=order)
+    if current_user == order.shop.user or current_user == order.rider.user or current_user == order.consumer:
+        return render_template('user/show_order.html', order=order)
+    else:
+        abort(403)
 
 
 @user_bp.route('/<username>/collections', methods=['GET'])

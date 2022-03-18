@@ -7,7 +7,7 @@ from flask import current_app
 from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 from .extensions import db
-from .models import User, Dish, Tag, Comment, Order, File, Shop, Rider
+from .models import User, Dish, Tag, Comment, Order, File, Shop, Rider, Message
 from .notifications import push_new_order_notification, push_delivered_notification
 
 fake = Faker("zh_CN")
@@ -140,4 +140,17 @@ def fake_order(count=200):
             is_finish=True
         )
         db.session.add(order)
+    db.session.commit()
+
+
+def fake_message(count=200):
+    for i in range(count):
+        dish = Dish.query.get(random.randint(1, Dish.query.count()))
+        message = Message(
+            body=fake.sentence(),
+            author=dish.shop.user,
+            dish_id=dish.id,
+            timestamp=fake.date_time_this_year()
+        )
+    db.session.add(message)
     db.session.commit()
