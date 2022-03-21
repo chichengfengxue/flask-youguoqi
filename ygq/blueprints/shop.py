@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 from ..decorators import confirm_required
 from ..extensions import db
 from ..forms.shop import DishForm, Apply2Shop, TagForm
-from ..models import User, Dish, Shop, File, Tag
+from ..models import User, Dish, Shop, File, Tag, Order
 from ..utils import redirect_back, rename_file, flash_errors, is_image
 
 shop_bp = Blueprint('shop', __name__)
@@ -20,6 +20,16 @@ def index(shop_id):
     pagination = Dish.query.with_parent(shop).order_by(Dish.timestamp.desc()).paginate(page, per_page)
     dishes = pagination.items
     return render_template('shop/index.html', shop=shop, pagination=pagination, dishes=dishes)
+
+
+@shop_bp.route('/order/<int:shop_id>')
+def show_orders(shop_id):
+    shop = Shop.query.get_or_404(shop_id)
+    page = request.args.get('page', 1, type=int)
+    per_page = current_app.config['YGQ_DISH_PER_PAGE']
+    pagination = Order.query.with_parent(shop).order_by(Order.start_time.desc()).paginate(page, per_page)
+    orders = pagination.items
+    return render_template('shop/orders.html', shop=shop, pagination=pagination, orders=orders)
 
 
 @shop_bp.route('/apply/<username>', methods=['GET', 'POST'])
@@ -88,6 +98,8 @@ def upload(shop_id):
 @login_required
 def new_dish(shop_id):
     shop = Shop.query.get_or_404(shop_id)
+    if current_user != shop.user:
+        abort(403)
     form = DishForm()
 
     if form.validate_on_submit():
@@ -95,6 +107,7 @@ def new_dish(shop_id):
             price=form.price.data,
             description=form.description.data,
             shop=shop,
+            prepare_time=form.prepare_time.data,
             name=form.name.data
         )
         db.session.add(dish)

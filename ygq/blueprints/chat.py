@@ -32,23 +32,6 @@ def new_message(message_body, dish_id=None):
          broadcast=True)
 
 
-@socketio.on('new message', namespace='/order2rider')
-def new_order2rider(message_body):
-    html_message = to_html(message_body)
-    message = Message(author=current_user._get_current_object(), body=html_message)
-    nickname = 'Anonymous'
-    emit('new message',
-         {'message_html': render_template('chat/_anonymous_message.html',
-                                          message=html_message,
-                                          avatar=avatar,
-                                          nickname=nickname),
-          'message_body': html_message,
-          'gravatar': avatar,
-          'nickname': nickname,
-          'user_id': current_user.id},
-         broadcast=True, namespace='/anonymous')
-
-
 @chat_bp.route('/')
 @login_required
 def home():

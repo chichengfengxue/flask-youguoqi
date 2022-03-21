@@ -1,219 +1,232 @@
-
-
-$(document).ready(function () {
-    // var socket = io.connect();
-    var popupLoading = '<i class="notched circle loading icon green"></i> Loading...';
-    var message_count = 0;
-    var ENTER_KEY = 13;
+$(function () {
+    var default_error_message = 'Server error, please try again later.';
 
     $.ajaxSetup({
         beforeSend: function (xhr, settings) {
             if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", csrf_token);
+                xhr.setRequestHeader('X-CSRFToken', csrf_token);
             }
         }
     });
 
-    function scrollToBottom() {
-        var $messages = $('.messages');
-        $messages.scrollTop($messages[0].scrollHeight);
+    $(document).ajaxError(function (event, request, settings) {
+        var message = null;
+        if (request.responseJSON && request.responseJSON.hasOwnProperty('message')) {
+            message = request.responseJSON.message;
+        } else if (request.responseText) {
+            var IS_JSON = true;
+            try {
+                var data = JSON.parse(request.responseText);
+            }
+            catch (err) {
+                IS_JSON = false;
+            }
+            if (IS_JSON && data !== undefined && data.hasOwnProperty('message')) {
+                message = JSON.parse(request.responseText).message;
+            } else {
+                message = default_error_message;
+            }
+        } else {
+            message = default_error_message;
+        }
+        toast(message, 'error');
+    });
+
+    var flash = null;
+
+    function toast(body, category) {
+        clearTimeout(flash);
+        var $toast = $('#toast');
+        if (category === 'error') {
+            $toast.css('background-color', 'red')
+        } else {
+            $toast.css('background-color', '#333')
+        }
+        $toast.text(body).fadeIn();
+        flash = setTimeout(function () {
+            $toast.fadeOut();
+        }, 3000);
     }
 
-    var page = 1;
+    var hover_timer = null;
 
-    function load_messages() {
-        var $messages = $('.messages');
-        var position = $messages.scrollTop();
-        if (position === 0) {
-            page++;
-            $('.ui.loader').toggleClass('active');
+    function show_profile_popover(e) {
+        var $el = $(e.target);
+
+        hover_timer = setTimeout(function () {
+            hover_timer = null;
             $.ajax({
-                url: messages_url,
                 type: 'GET',
-                data: {page: page},
+                url: $el.data('href'),
                 success: function (data) {
-                    var before_height = $messages[0].scrollHeight;
-                    // $(data).prependTo('.messages').hide().fadeIn(800);
-                    $('.messages').prepend(data).hide().fadeIn(800);
-                    var after_height = $messages[0].scrollHeight;
-                    flask_moment_render_all();
-                    $messages.scrollTop(after_height - before_height);
-                    $('.ui.loader').toggleClass('active');
-                    activateSemantics();
-                },
-                error: function () {
-                    alert('No more messages.');
-                    $('.ui.loader').toggleClass('active');
+                    $el.popover({
+                        html: true,
+                        content: data,
+                        trigger: 'manual',
+                        animation: false
+                    });
+                    $el.popover('show');
+                    $('.popover').on('mouseleave', function () {
+                        setTimeout(function () {
+                            $el.popover('hide');
+                        }, 200);
+                    });
                 }
             });
-        }
+        }, 500);
     }
 
-    $('.messages').scroll(load_messages);
+    function hide_profile_popover(e) {
+        var $el = $(e.target);
 
-    socket.on('new message', function (data) {
-        // message_count++;
-        // if (!document.hasFocus()) {
-        //     document.title = '(' + message_count + ') ' + 'YouGuoQi';
-        // }
-        // if (data.user_id !== current_user_id) {
-        //     messageNotify(data);
-        // }
-        $('.messages').append(data.message_html);
-        flask_moment_render_all();
-        scrollToBottom();
-        activateSemantics();
-    });
-
-    // function new_message(e) {
-    //     var $textarea = $('#message-textarea');
-    //     var message_body = $textarea.val().trim();  // 获取消息正文
-    //     if (e.which === ENTER_KEY && !e.shiftKey && message_body) {
-    //         e.preventDefault();  // 阻止默认行为，即换行
-    //         socket.emit('new message', message_body);
-    //         $textarea.val('')
-    //     }
-    // }
-
-    // submit message
-    // $('#message-textarea').on('keydown', new_message.bind(this));
-
-
-    $('#meg-submit').on('click', function () {
-        var $message_textarea = $('#message-textarea');
-        var message = $message_textarea.val();
-        var dish_id = $('#dish-id').val();
-        if (message.trim() !== '') {
-            socket.emit('new message', message, dish_id);
-            $message_textarea.val('');
-            $('#dish-id').val('');
-        }
-    });
-
-
-    $('#send-button').on('click', function () {
-        var $mobile_textarea = $('#mobile-message-textarea');
-        var message = $mobile_textarea.val();
-        if (message.trim() !== '') {
-            socket.emit('new message', message);
-            $mobile_textarea.val('')
-        }
-    });
-
-
-
-    function messageNotify(data) {
-        if (Notification.permission !== "granted")
-            Notification.requestPermission();
-        else {
-            var notification = new Notification("Message from " + data.nickname, {
-                icon: data.gravatar,
-                body: data.message_body.replace(/(<([^>]+)>)/ig, "")
-            });
-
-            notification.onclick = function () {
-                window.open(root_url);
-            };
+        if (hover_timer) {
+            clearTimeout(hover_timer);
+            hover_timer = null;
+        } else {
             setTimeout(function () {
-                notification.close()
-            }, 4000);
+                if (!$('.popover:hover').length) {
+                    $el.popover('hide');
+                }
+            }, 200);
         }
     }
 
-    function activateSemantics() {
-        $('.ui.dropdown').dropdown();
-        $('.ui.checkbox').checkbox();
-
-        $('.message .close').on('click', function () {
-            $(this).closest('.message').transition('fade');
+    function update_followers_count(id) {
+        var $el = $('#followers-count-' + id);
+        $.ajax({
+            type: 'GET',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.text(data.count);
+            }
         });
-
-        $('#toggle-sidebar').on('click', function () {
-            $('.menu.sidebar').sidebar('setting', 'transition', 'overlay').sidebar('toggle');
-        });
-
-        $('#show-help-modal').on('click', function () {
-            $('.ui.modal.help').modal({blurring: true}).modal('show');
-        });
-
-        $('#show-snippet-modal').on('click', function () {
-            $('.ui.modal.snippet').modal({blurring: true}).modal('show');
-        });
-
-        // $('.pop-card').popup({
-        //     inline: true,
-        //     on: 'hover',
-        //     hoverable: true,
-        //     html: popupLoading,
-        //     delay: {
-        //         show: 200,
-        //         hide: 200
-        //     },
-        //     onShow: function () {
-        //         var popup = this;
-        //         popup.html(popupLoading);
-        //         $.get({
-        //             url: $(popup).prev().data('href')
-        //         }).done(function (data) {
-        //             popup.html(data);
-        //         }).fail(function () {
-        //             popup.html('Failed to load profile.');
-        //         });
-        //     }
-        // });
     }
 
-    function init() {
-        // desktop notification
-        document.addEventListener('DOMContentLoaded', function () {
-            if (!Notification) {
-                alert('Desktop notifications not available in your browser.');
-                return;
+    function update_collectors_count(id) {
+        $.ajax({
+            type: 'GET',
+            url: $('#collectors-count-' + id).data('href'),
+            success: function (data) {
+                console.log(data);
+                $('#collectors-count-' + id).text(data.count);
             }
-
-            if (Notification.permission !== "granted")
-                Notification.requestPermission();
         });
-
-        $(window).focus(function () {
-            message_count = 0;
-            document.title = 'YouGuoQi';
-        });
-
-        activateSemantics();
-        scrollToBottom();
     }
 
-    // delete message
-    $('.messages').on('click', '.delete-button', function () {
-        var $this = $(this);
+    function update_notifications_count() {
+        var $el = $('#notification-badge');
         $.ajax({
-            type: 'DELETE',
-            url: $this.data('href'),
-            success: function () {
-                $this.parent().parent().parent().remove();
-            },
-            error: function () {
-                alert('Oops, something was wrong!')
+            type: 'GET',
+            url: $el.data('href'),
+            success: function (data) {
+                if (data.count === 0) {
+                    $('#notification-badge').hide();
+                } else {
+                    $el.show();
+                    $el.text(data.count)
+                }
             }
         });
-    });
+    }
 
-    // delete user
-    $(document).on('click', '.delete-user-button', function () {
-        var $this = $(this);
+    function follow(e) {
+        var $el = $(e.target);
+        var id = $el.data('id');
+
         $.ajax({
-            type: 'DELETE',
-            url: $this.data('href'),
-            success: function () {
-                alert('Success, this user is gone!')
-            },
-            error: function () {
-                alert('Oops, something was wrong!')
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.prev().show();
+                $el.hide();
+                update_followers_count(id);
+                toast(data.message);
             }
         });
+    }
+
+    function unfollow(e) {
+        var $el = $(e.target);
+        var id = $el.data('id');
+
+        $.ajax({
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.next().show();
+                $el.hide();
+                update_followers_count(id);
+                toast(data.message);
+            }
+        });
+    }
+
+    function collect(e) {
+        var $el = $(e.target).data('href') ? $(e.target) : $(e.target).parent('.collect-btn');
+        var id = $el.data('id');
+
+        $.ajax({
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.prev().show();
+                $el.hide();
+                update_collectors_count(id);
+                toast(data.message);
+            }
+        });
+    }
+
+    function uncollect(e) {
+        var $el = $(e.target).data('href') ? $(e.target) : $(e.target).parent('.uncollect-btn');
+        var id = $el.data('id');
+        $.ajax({
+            type: 'POST',
+            url: $el.data('href'),
+            success: function (data) {
+                $el.next().show();
+                $el.hide();
+                update_collectors_count(id);
+                toast(data.message);
+            }
+        });
+    }
+
+    $('.profile-popover').hover(show_profile_popover.bind(this), hide_profile_popover.bind(this));
+    $(document).on('click', '.follow-btn', follow.bind(this));
+    $(document).on('click', '.unfollow-btn', unfollow.bind(this));
+    $(document).on('click', '.collect-btn', collect.bind(this));
+    $(document).on('click', '.uncollect-btn', uncollect.bind(this));
+
+    // hide or show tag edit form
+    $('#tag-btn').click(function () {
+        $('#tags').hide();
+        $('#tag-form').show();
+    });
+    $('#cancel-tag').click(function () {
+        $('#tag-form').hide();
+        $('#tags').show();
+    });
+    // hide or show description edit form
+    $('#description-btn').click(function () {
+        $('#description').hide();
+        $('#description-form').show();
+    });
+    $('#cancel-description').click(function () {
+        $('#description-form').hide();
+        $('#description').show();
+    });
+    // delete confirm modal
+    $('#confirm-delete').on('show.bs.modal', function (e) {
+        $('.delete-form').attr('action', $(e.relatedTarget).data('href'));
     });
 
-    init();
+    if (is_authenticated) {
+        setInterval(update_notifications_count, 30000);
+    }
+
+    $("[data-toggle='tooltip']").tooltip({title: moment($(this).data('timestamp')).format('lll')})
 
 });
+
+

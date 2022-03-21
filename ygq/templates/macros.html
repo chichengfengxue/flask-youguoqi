@@ -9,9 +9,9 @@
             <div>
                 {{ dish.name }}
             </div>
-            <span class="oi oi-yen"></span> {{ dish.price }}
-            <span class="oi oi-star"></span> {{ dish.collectors|length }}
-            <span class="oi oi-comment-square"></span> {{ dish.comments|length }}
+            <span class="oi oi-yen"></span> {{ dish.price }} |
+            <span class="oi oi-star"></span> {{ dish.collectors|length }} |
+            <span class="oi oi-comment-square"></span> {{ dish.comments|length }} |
             {{ dish.sales }}人付款
         </div>
     </div>
@@ -26,8 +26,8 @@
             <div>
                 {{ order.dish.name }}
             </div>
-            <span class="oi oi-yen"></span> {{ order.price }}
-            <span class="oi oi-clock"></span>  {{ order.start_time }}
+            <span class="oi oi-yen"></span> {{ order.price }} |
+            <span class="oi oi-clock"></span>  {{ order.start_time }} |
         </div>
     </div>
 {% endmacro %}

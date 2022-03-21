@@ -1,0 +1,36 @@
+<div class="msg-box">
+    <div class="picture">
+        <a href="{{ url_for('user.index', username=order.consumer.username) }}" >
+            <img class="pop-card" data-position="right center" data-offset="-40"
+                 src="{{ url_for('main.get_avatar', filename=order.consumer.avatar_s) }}">
+        </a>
+    </div>
+    <div class="msg" >
+        <span class="nickname">{{ order.consumer.name }}</span>
+        <small class="timestamp">{{ moment(order.start_time).format('lll') }}</small>
+        <div>
+            订单号 <a href="{{ url_for('user.show_order', order_id=order.id) }}">{{ order.id }}</a>
+        </div>
+        <div>
+            下单时间 <span class="oi oi-clock"></span> {{ order.start_time }}
+        </div>
+        <div>
+            {% if not order.is_prepared %}
+                商品准备时间 <span class="oi oi-clock"></span> {{ order.dish.prepare_time }} minutes
+            {% else %}
+                商家已完成菜品
+            {% endif %}
+        </div>
+        <span class="oi oi-yen"></span>{{ order.fare }}
+        <span class="message-body">FROM <span style="color: #aa0101">{{ order.consumer.location_x }} | {{ order.consumer.location_y }}</span></span>
+        <span class="message-body">TO <span style="color: #aa0101">{{ order.shop.location_x }} | {{ order.shop.location_y }}</span></span>
+
+        {% if current_user.is_authenticated %}
+            <div class="item delete-button"
+                data-href="{{ url_for('delivery.accept_delivery', order_id=order.id) }}"
+                onclick="confirm('Are you sure?')">
+                <button class="ui button orange approve" id="accept-submit" type="button">接单</button>
+            </div>
+        {% endif %}
+    </div>
+</div>

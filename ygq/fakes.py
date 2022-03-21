@@ -87,7 +87,8 @@ def fake_dish(count=100):
             price=random.randint(10, 100),
             timestamp=fake.date_time_this_year(),
             shop=Shop.query.get(random.randint(1, Shop.query.count())),
-            sales=random.randint(0, 1000)
+            sales=random.randint(0, 1000),
+            prepare_time=random.randint(0, 100),
         )
         file.dish = dish
         # tags
@@ -134,10 +135,35 @@ def fake_order(count=200):
             price=dish.price*number+fare,
             fare=fare,
             start_time=start_time,
+            number=number,
             time=start_time+timedelta(seconds=fare),
             dish=dish,
             shop=dish.shop,
-            is_finish=True
+            is_finish=True,
+            is_accept=True,
+            is_prepared=True
+        )
+        db.session.add(order)
+    db.session.commit()
+
+
+def fake_delivery(count=100):
+    for i in range(count):
+        dish = Dish.query.get(random.randint(1, Dish.query.count()))
+        start_time = fake.date_time_this_year()
+        fare = random.randint(1, 50)
+        number = random.randint(1, 10)
+        dish.sales += 1
+        order = Order(
+            consumer=User.query.get(random.randint(1, User.query.count())),
+            price=dish.price*number+fare,
+            fare=fare,
+            start_time=start_time,
+            dish=dish,
+            shop=dish.shop,
+            is_finish=False,
+            is_accept=False,
+            is_prepared=False
         )
         db.session.add(order)
     db.session.commit()

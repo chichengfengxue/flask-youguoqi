@@ -8,6 +8,7 @@ from flask_wtf.csrf import CSRFError
 # from .blueprints.admin import admin_bp
 # from .blueprints.ajax import ajax_bp
 from .blueprints.auth import auth_bp
+from .blueprints.delivery import delivery_bp
 from .blueprints.main import main_bp
 from .blueprints.rider import rider_bp
 from .blueprints.shop import shop_bp
@@ -15,6 +16,7 @@ from .blueprints.user import user_bp
 from .blueprints.chat import chat_bp
 
 from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio
+from .fakes import fake_delivery
 from .models import User, Dish, Tag, Follow, Notification, Comment, Collect, Order, Rider, Shop, File
 from .settings import config
 
@@ -58,7 +60,7 @@ def register_blueprints(app):
     app.register_blueprint(rider_bp, url_prefix='/rider')
     app.register_blueprint(shop_bp, url_prefix='/shop')
     app.register_blueprint(chat_bp, url_prefix='/chat')
-
+    app.register_blueprint(delivery_bp, url_prefix='/delivery')
     # app.register_blueprint(admin_bp, url_prefix='/admin')
     # app.register_blueprint(ajax_bp, url_prefix='/ajax')
 
@@ -138,7 +140,8 @@ def register_commands(app):
     @click.option('--order', default=100, help='Quantity of orders, default is 200.')
     @click.option('--shop', default=20, help='Quantity of shops, default is 20.')
     @click.option('--message', default=200, help='Quantity of messages, default is 200.')
-    def forge(user, follow, tag, collect, comment, dish, order, shop, message):
+    @click.option('--delivery', default=100, help='Quantity of deliveries, default is 100.')
+    def forge(user, follow, tag, collect, comment, dish, order, shop, message, delivery):
         """Generate fake data."""
 
         from .fakes import fake_shop, fake_comment, fake_follow, fake_tag, fake_user, \
@@ -165,4 +168,6 @@ def register_commands(app):
         fake_order(order)
         click.echo('Generating %d messages...' % order)
         fake_message(message)
+        click.echo('Generating %d deliveries...' % delivery)
+        fake_delivery(delivery)
         click.echo('Done.')

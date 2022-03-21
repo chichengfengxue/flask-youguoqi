@@ -40,24 +40,24 @@ def buy(dish_id):
         shop_location_x = dish.shop.location_x
         shop_location_y = dish.shop.location_y
         number = form.number.data
-        riders = Rider.query.filter_by(active=True).order_by(func.random()).limit(100)
-        distances = [(abs(rider.location_x-user_location_x)+abs(rider.location_y-user_location_y), rider.id) \
-                     for rider in riders]
-        distance = min(distances, key=lambda x: x[0])
-        rider = Rider.query.get_or_404(distance[1])
-        fare = distance[0] + abs(shop_location_x-user_location_x) + abs(shop_location_y-user_location_y)
+        # riders = Rider.query.filter_by(active=True).order_by(func.random()).limit(100)
+        # distances = [(abs(rider.location_x-user_location_x)+abs(rider.location_y-user_location_y), rider.id) \
+        #              for rider in riders]
+        # distance = min(distances, key=lambda x: x[0])
+        # rider = Rider.query.get_or_404(distance[1])
+        # fare = distance[0] + abs(shop_location_x-user_location_x) + abs(shop_location_y-user_location_y)
         order = Order(
             dish=dish,
             shop=dish.shop,
-            consumer=user,
-            rider=rider,
-            price=dish.price*number+fare,
-            time=datetime.now()+timedelta(seconds=fare),
+            # consumer=user,
+            # rider=rider,
+            # price=dish.price*number+fare,
+            # time=datetime.now()+timedelta(seconds=fare),
             number=number
         )
         db.session.add(order)
-        rider.income += fare
-        dish.sales += 1
+        # rider.income += fare
+        # dish.sales += 1
         db.session.commit()
         flash('Order successfully.', 'success')
 
@@ -73,8 +73,11 @@ def buy(dish_id):
 @login_required
 def show_order(order_id):
     order = Order.query.get_or_404(order_id)
-    if current_user == order.shop.user or current_user == order.rider.user or current_user == order.consumer:
+    if current_user == order.shop.user or current_user == order.consumer:
         return render_template('user/show_order.html', order=order)
+    elif order.rider:
+        if current_user == order.rider.user:
+            return render_template('user/show_order.html', order=order)
     else:
         abort(403)
 

@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 
-
 from flask import current_app
 from flask_avatars import Identicon
 from flask_login import UserMixin
@@ -169,6 +168,8 @@ class Order(db.Model):
     number = db.Column(db.Integer)
     fare = db.Column(db.Integer)
     is_finish = db.Column(db.Boolean, default=False)
+    is_accept = db.Column(db.Boolean, default=False)
+    is_prepared = db.Column(db.Boolean, default=False)
     start_time = db.Column(db.DateTime, default=datetime.utcnow)
     time = db.Column(db.DateTime)
 
@@ -187,6 +188,7 @@ class Dish(db.Model):
     description = db.Column(db.String(500))
     filename_s = db.Column(db.String(64))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+    prepare_time = db.Column(db.Integer)
     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
     shop = db.relationship('Shop', back_populates='dishes')
     files = db.relationship('File', back_populates='dish')

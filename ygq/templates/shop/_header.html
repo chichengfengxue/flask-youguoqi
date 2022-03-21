@@ -28,16 +28,23 @@
 </div>
 <div class="user-nav">
     <ul class="nav nav-tabs">
-        <div class="container">
-            <p class="float-left">
-                {{ render_nav_item('shop.new_dish', 'dishes', shop.dishes|length, shop_id=shop.id) }}
-            </p>
-            <p class="float-right">
-                <a href="{{ url_for('shop.new_dish', shop_id=shop.id) }}">
-                    <span class="oi oi-plus"> NEW</span>
-                </a>
-            </p>
-        </div>
+        {{ render_nav_item('shop.index', 'Dishes', shop.dishes|length, shop_id=shop.id) }}
+        {{ render_nav_item('shop.show_orders', 'Orders', shop.orders|length, shop_id=shop.id) }}
+        <span style="padding-left: 800px; font-style: italic; ">{{ render_nav_item('shop.new_dish', 'New Dish', shop_id=shop.id) }}</span>
+
+{#        <div class="container">#}
+{#            <p class="float-left">#}
+{#                {{ render_nav_item('shop.new_dish', 'dishes', shop.dishes|length, shop_id=shop.id) }}#}
+{#            </p>#}
+{#            <p class="float-left">#}
+{#                {{ render_nav_item('shop.new_dish', 'dishes', shop.dishes|length, shop_id=shop.id) }}#}
+{#            </p>#}
+{#            <p class="float-right">#}
+{#                <a href="{{ url_for('shop.new_dish', shop_id=shop.id) }}">#}
+{#                    <span class="oi oi-plus"> NEW</span>#}
+{#                </a>#}
+{#            </p>#}
+{#        </div>#}
     </ul>
 
 </div>

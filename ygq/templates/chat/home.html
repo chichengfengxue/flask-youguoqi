@@ -41,6 +41,7 @@
                         {{ render_nav_item('rider.index', 'Rider', rider_id=current_user.rider[0].id ) }}
                     {% endif %}
                     {{ render_nav_item('chat.home', 'Chat') }}
+                    {{ render_nav_item('delivery.home', 'Delivery') }}
                     <form class="form-inline my-2 my-lg-0" action="{{ url_for('main.search') }}">
                         <input type="text" name="q" class="form-control mr-sm-1" placeholder="Dish, tag or user"
                                required>
@@ -129,7 +130,7 @@
     <script src="{{ url_for('static', filename='semantic-ui/semantic.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script_socket.js') }}"></script>
     {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
     <script type="text/javascript">
         var root_url = "{{ url_for('chat.home') }}";

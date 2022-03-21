@@ -104,6 +104,7 @@ def collect(dish_id):
 
 @main_bp.route('/uncollect/<int:dish_id>', methods=['POST'])
 @login_required
+@confirm_required
 def uncollect(dish_id):
     dish = Dish.query.get_or_404(dish_id)
     if not current_user.is_collecting(dish):

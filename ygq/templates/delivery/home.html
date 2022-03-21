@@ -6,16 +6,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block head %}
-        <title>{% block title %}{% endblock %} - YouGuoQi</title>
+        <title>delivery - YouGuoQi</title>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         {% block styles %}
             <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
             <link rel="stylesheet" href="{{ url_for('static', filename='open-iconic/font/css/open-iconic-bootstrap.css') }}">
             <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+            <link rel="stylesheet" href="{{ url_for('static', filename='semantic-ui/semantic.min.css') }}">
         {% endblock styles %}
     {% endblock head %}
 </head>
-
 <body>
 {% block navbar %}
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -92,44 +92,67 @@
     </nav>
 {% endblock %}
 
-<main>
-    <div class="container">
-        {% for message in get_flashed_messages(with_categories=True) %}
-            <div class="alert alert-{{ message[0] }}">
-                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                {{ message[1] }}
-            </div>
-        {% endfor %}
-        {% block content %}{% endblock %}
-        {% block footer %}
-            <footer>
-                <p class="float-left">
-                    <small>&copy; 2022
-                        <a href="https://github.com/chichengfengxue/flask-youguoqi" title="Fork me on GitHub">GitHub</a>
-                    </small>
-                </p>
-                <p class="float-right">
-                    <small>有锅气</small>
-                </p>
-            </footer>
-        {% endblock %}
+{#<div class="pusher">#}
+    <div class="chat-box">
+        <div class="messages">
+            <div class="ui text loader">Loading deliveries...</div>
+            {% include 'delivery/_deliveries.html' %}
+        </div>
     </div>
-</main>
-<div id="toast"></div>
+    <div class="input-area">
+{#        <form class="form" role="form">#}
+            {% if current_order %}
+            <div class="form-group required">
+                <label class="form-control-label" for="order-id">order_id</label>
+                <input class="form-control" id="order-id" name="name" required="" type="number" value="{{ current_order.id }}" placeholder="请输入订单号">
+            </div>
+            {% else %}
+            <div class="form-group required">
+                <label class="form-control-label" for="order-id">order_id</label>
+                <input class="form-control" id="order-id" name="name" required="" type="number" value="" placeholder="请输入订单号">
+            </div>
+            {% endif %}
+            <div class="form-group required">
+                <label class="form-control-label" for="fare">fare</label>
+                <input class="form-control" id="fare" name="name" required="" type="number" value="" placeholder="请输入订单报酬">
+            </div>
+            <button class="ui button orange approve" id="delivery-submit" type="button">提交</button>
+{#        </form>#}
+    </div>
+{#
+{#</div>#}
+
+
+{% for message in get_flashed_messages(with_categories=True) %}
+    <div class="alert alert-{{ message[0] }}">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        {{ message[1] }}
+    </div>
+{% endfor %}
+
 
 {% block scripts %}
+{#    {{ super() }}#}
     <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='semantic-ui/semantic.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/script_socket.js') }}"></script>
     {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script type="text/javascript">
+        var root_url = "{{ url_for('delivery.home') }}";
+        var messages_url = "{{ url_for('delivery.get_orders') }}";
+        var current_user_id = {{ current_user.id|default(0) }};
         var csrf_token = "{{ csrf_token() }}";
+
         {% if current_user.is_authenticated %}
             var is_authenticated = true;
         {% else %}
             var is_authenticated = false;
         {% endif %}
+
+        var socket = io('/delivery');
+
     </script>
 {% endblock %}
 </body>
