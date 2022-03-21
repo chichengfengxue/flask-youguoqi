@@ -106,10 +106,10 @@ venv.bak/
 # Development
 *.db
 .idea
-uploads/*
-!uploads/.gitkeep
-!uploads/avatars
-uploads/avatars/*
-!uploads/avatars/.gitkeep
+#uploads/*
+#!uploads/.gitkeep
+#!uploads/avatars
+#uploads/avatars/*
+#!uploads/avatars/.gitkeep
 
 whooshee
