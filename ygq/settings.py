@@ -43,7 +43,6 @@ class BaseConfig:
     YGQ_SEARCH_RESULT_PER_PAGE = 20
     YGQ_MESSAGE_PER_PAGE = 30
 
-
     # 图片上传
     YGQ_UPLOAD_PATH = os.path.join(basedir, 'uploads')
     YGQ_DISH_SIZE = {'small': 400, 'medium': 800}
