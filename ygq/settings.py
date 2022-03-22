@@ -4,13 +4,13 @@ from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from apscheduler.executors.pool import ThreadPoolExecutor
 
 basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-
-# SQLite URI compatible
-WIN = sys.platform.startswith('win')
-if WIN:
-    prefix = 'sqlite:///'
-else:
-    prefix = 'sqlite:////'
+#
+# # SQLite URI compatible
+# WIN = sys.platform.startswith('win')
+# if WIN:
+#     prefix = 'sqlite:///'
+# else:
+#     prefix = 'sqlite:////'
 
 
 class Operations:
@@ -69,18 +69,18 @@ class BaseConfig:
 
     WHOOSHEE_MIN_STRING_LEN = 1  # 搜索关键字的最小字符数
 
-    # 定时器配置项
-    # 持久化配置，数据持久化至MongoDB
-    SCHEDULER_JOBSTORES = {
-        'default': SQLAlchemyJobStore(url=prefix + os.path.join(basedir, 'data-dev.db'))}
-    # 线程池配置，最大20个线程
-    SCHEDULER_EXECUTORS = {'default': ThreadPoolExecutor(20)}
-    # 调度开关开启
-    SCHEDULER_API_ENABLED = True
-    # 设置容错时间为 1小时
-    SCHEDULER_JOB_DEFAULTS = {'misfire_grace_time': 3600}
-    # 配置时区
-    SCHEDULER_TIMEZONE = 'Asia/Shanghai'
+    # # 定时器配置项
+    # # 持久化配置，数据持久化至MongoDB
+    # SCHEDULER_JOBSTORES = {
+    #     'default': SQLAlchemyJobStore(url=prefix + os.path.join(basedir, 'data-dev.db'))}
+    # # 线程池配置，最大20个线程
+    # SCHEDULER_EXECUTORS = {'default': ThreadPoolExecutor(20)}
+    # # 调度开关开启
+    # SCHEDULER_API_ENABLED = True
+    # # 设置容错时间为 1小时
+    # SCHEDULER_JOB_DEFAULTS = {'misfire_grace_time': 3600}
+    # # 配置时区
+    # SCHEDULER_TIMEZONE = 'Asia/Shanghai'
 
 
 class DevelopmentConfig(BaseConfig):
@@ -96,8 +96,9 @@ class TestingConfig(BaseConfig):
 
 
 class ProductionConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',
-                                        prefix + os.path.join(basedir, 'data.db'))
+    # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',
+    #                                     prefix + os.path.join(basedir, 'data.db'))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 config = {
