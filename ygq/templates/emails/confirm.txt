@@ -1,6 +1,6 @@
 Hello {{ user.username }},
 
-Welcome to Albumy!
+Welcome to YouGuoQi!
 
 Please visit the link below to verify your email address:
 
