@@ -62,7 +62,10 @@ def show_notifications():
 
 @main_bp.route('/uploads/<path:filename>')
 def get_image(filename):
-    return send_from_directory(current_app.config['YGQ_UPLOAD_PATH'], filename)
+    try:
+        return send_from_directory(current_app.config['YGQ_UPLOAD_PATH'], filename)
+    except:
+        abort(500)
 
 
 @main_bp.route('/avatars/<path:filename>')
