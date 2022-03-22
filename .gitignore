@@ -111,5 +111,6 @@ venv.bak/
 #!uploads/avatars
 #uploads/avatars/*
 #!uploads/avatars/.gitkeep
+#ygq/settings.py
 
 whooshee
