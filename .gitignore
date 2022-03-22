@@ -111,6 +111,8 @@ venv.bak/
 #!uploads/avatars
 #uploads/avatars/*
 #!uploads/avatars/.gitkeep
-#ygq/settings.py
+ygq/settings.py
+ygq/__init__.py
+.flaskenv
 
 whooshee
