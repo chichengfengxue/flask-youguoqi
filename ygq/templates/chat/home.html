@@ -146,7 +146,7 @@
             var is_authenticated = false;
         {% endif %}
 
-        var socket = io();
+        var socket = io("/", { transports: ["websocket"] });
 
     </script>
 {% endblock %}

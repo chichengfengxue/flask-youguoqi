@@ -153,7 +153,7 @@
             var is_authenticated = false;
         {% endif %}
 
-        var socket = io('/delivery');
+        var socket = io('/delivery', { transports: ["websocket"] });
 
     </script>
 {% endblock %}
