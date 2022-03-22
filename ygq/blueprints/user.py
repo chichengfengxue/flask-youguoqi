@@ -61,7 +61,7 @@ def buy(dish_id):
         db.session.commit()
         flash('Order successfully.', 'success')
 
-        push_new_order_notification(order, order.rider.user)
+        # push_new_order_notification(order, order.rider.user)
         push_new_order_notification(order, order.shop.user)
         return redirect(url_for('.show_order', order_id=order.id))
     form.location_x.data = user.location_x
