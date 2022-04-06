@@ -50,7 +50,7 @@ def register_extensions(app):
     whooshee.init_app(app)
     avatars.init_app(app)
     csrf.init_app(app)
-    socketio.init_app(app, cors_allowed_origins="*")
+    socketio.init_app(app)
 
 
 def register_blueprints(app):

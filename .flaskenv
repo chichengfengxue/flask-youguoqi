@@ -1,3 +1,2 @@
 FLASK_APP=ygq
-FLASK_ENV=production
-FLASK_CONFIG=production
+FLASK_ENV=development

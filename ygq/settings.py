@@ -84,10 +84,10 @@ class BaseConfig:
 
 
 class DevelopmentConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
-    # SQLALCHEMY_DATABASE_URI = \
-    #     prefix + os.path.join(basedir, 'data-dev.db')
-    # REDIS_URL = "redis://localhost"
+    # SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = \
+        prefix + os.path.join(basedir, 'data-dev.db')
+    REDIS_URL = "redis://localhost"
 
 
 class TestingConfig(BaseConfig):
