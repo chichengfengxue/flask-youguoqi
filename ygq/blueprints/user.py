@@ -35,37 +35,21 @@ def buy(dish_id):
     dish = Dish.query.get_or_404(dish_id)
     form = EditOrder()
     if form.validate_on_submit():
-        user_location_x = form.location_x.data
-        user_location_y = form.location_y.data
-        shop_location_x = dish.shop.location_x
-        shop_location_y = dish.shop.location_y
+        fare = form.fare.data
         number = form.number.data
-        # riders = Rider.query.filter_by(active=True).order_by(func.random()).limit(100)
-        # distances = [(abs(rider.location_x-user_location_x)+abs(rider.location_y-user_location_y), rider.id) \
-        #              for rider in riders]
-        # distance = min(distances, key=lambda x: x[0])
-        # rider = Rider.query.get_or_404(distance[1])
-        # fare = distance[0] + abs(shop_location_x-user_location_x) + abs(shop_location_y-user_location_y)
         order = Order(
             dish=dish,
             shop=dish.shop,
-            # consumer=user,
-            # rider=rider,
-            # price=dish.price*number+fare,
-            # time=datetime.now()+timedelta(seconds=fare),
+            consumer=user,
+            fare=fare,
             number=number
         )
         db.session.add(order)
-        # rider.income += fare
-        # dish.sales += 1
         db.session.commit()
         flash('Order successfully.', 'success')
 
-        # push_new_order_notification(order, order.rider.user)
         push_new_order_notification(order, order.shop.user)
         return redirect(url_for('.show_order', order_id=order.id))
-    form.location_x.data = user.location_x
-    form.location_y.data = user.location_y
     return render_template('user/buy.html', form=form)
 
 
@@ -124,9 +108,9 @@ def show_followers(username):
     user = User.query.filter_by(username=username).first_or_404()
     page = request.args.get('page', 1, type=int)
     per_page = current_app.config['YGQ_USER_PER_PAGE']
-    pagination = user.followers.paginate(page, per_page)
+    pagination = user.following.paginate(page, per_page)
     follows = pagination.items
-    return render_template('user/followers.html', user=user, pagination=pagination, follows=follows)
+    return render_template('user/following.html', user=user, pagination=pagination, follows=follows)
 
 
 @user_bp.route('/settings/profile', methods=['GET', 'POST'])

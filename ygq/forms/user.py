@@ -26,11 +26,14 @@ class EditProfileForm(FlaskForm):
 class EditOrder(FlaskForm):
     """订单编辑表单"""
     number = IntegerField('number', validators=[DataRequired()])
-    location_x = IntegerField('location-x', validators=[DataRequired()])
-    location_y = IntegerField('location-y', validators=[DataRequired()])
+    fare = IntegerField('fare', validators=[DataRequired()])
     submit = SubmitField()
 
     def validate_number(self, field):
+        if field.data <= 0:
+            raise ValidationError('Quantity must be greater than zero!')
+
+    def validate_fare(self, field):
         if field.data <= 0:
             raise ValidationError('Quantity must be greater than zero!')
 

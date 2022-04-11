@@ -58,11 +58,11 @@
                     <a class="nav-item nav-link" href="{{ url_for('main.show_notifications') }}">
                         <span class="oi oi-bell"></span>
                     </a>
-                    {% if current_user.shops %}
-                    <a class="nav-item nav-link" href="{{ url_for('shop.upload', shop_id=current_user.shops[0].id) }}" title="Upload">
-                        <span class="oi oi-cloud-upload"></span>&nbsp;&nbsp;
-                    </a>
-                    {% endif %}
+{#                    {% if current_user.shops %}#}
+{#                    <a class="nav-item nav-link" href="{{ url_for('shop.upload', shop_id=current_user.shops[0].id) }}" title="Upload">#}
+{#                        <span class="oi oi-cloud-upload"></span>&nbsp;&nbsp;#}
+{#                    </a>#}
+{#                    {% endif %}#}
                     <div class="dropdown nav-item">
                         <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
                            aria-expanded="false">

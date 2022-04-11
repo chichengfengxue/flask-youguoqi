@@ -101,7 +101,6 @@ def new_dish(shop_id):
     if current_user != shop.user:
         abort(403)
     form = DishForm()
-
     if form.validate_on_submit():
         dish = Dish(
             price=form.price.data,
@@ -173,3 +172,14 @@ def delete_tag(dish_id, tag_id):
 
     flash('Tag deleted.', 'info')
     return redirect(url_for('main.show_dish', dish_id=dish_id))
+
+
+@shop_bp.route('/finish/order/<int:order_id>', methods=['POST'])
+@login_required
+def finish_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    if current_user != order.shop.user:
+        abort(403)
+    order.is_prepared = True
+    db.session.commit()
+    return redirect_back()

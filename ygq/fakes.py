@@ -21,7 +21,7 @@ def fake_user(count=100):
                     location_x=random.randint(0, 1000),
                     location_y=random.randint(0, 1000),
                     email=fake.email(),
-                    tel=str(random.randint(600000, 19999999999))
+                    tel=fake.phone_number()
                     )
         user.set_password('123456')
         db.session.add(user)
@@ -58,10 +58,10 @@ def fake_tag(count=20):
 def fake_shop(count=20):
     for i in range(count):
         shop = Shop(
-            name=fake.name(),
+            name=fake.company(),
             location_x=random.randint(0, 1000),
             location_y=random.randint(0, 1000),
-            tel=str(random.randint(600000, 19999999999)),
+            tel=fake.phone_number(),
             user=User.query.get(random.randint(1, User.query.count()))
         )
     db.session.add(shop)
@@ -82,7 +82,7 @@ def fake_dish(count=100):
         )
 
         dish = Dish(
-            name=fake.name(),
+            name=fake.name()+'菜',
             description=fake.text(),
             price=random.randint(10, 100),
             timestamp=fake.date_time_this_year(),

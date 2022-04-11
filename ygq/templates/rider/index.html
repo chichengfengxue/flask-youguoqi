@@ -53,6 +53,13 @@
                                 订单已完成 {{ order.time }}
                             {% else %}
                                 订单正在配送 {{ order.shop.location_x }} | {{ order.shop.location_y }} <span class="oi oi-arrow-right"></span> {{ order.consumer.location_x }} | {{ order.consumer.location_y }}
+                                {% if current_user.is_authenticated and order.rider.user == current_user %}
+                                    <form class="inline" method="post"
+                                          action="{{ url_for('rider.finish_order', order_id=order.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Finish</button>
+                                    </form>
+                                {% endif %}
                             {% endif %}
                         </a>
                     </div>

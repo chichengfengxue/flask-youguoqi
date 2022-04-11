@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from ..emails import send_confirm_email, send_reset_password_email
 from ..extensions import db
 from ..forms.auth import LoginForm, RegisterForm, ForgetPasswordForm, ResetPasswordForm
-from ..models import User
+from ..models import User, Rider
 from ..settings import Operations
 from ..utils import generate_token, validate_token, redirect_back
 
@@ -46,9 +46,15 @@ def register():
         email = form.email.data.lower()
         username = form.username.data
         password = form.password.data
-        user = User(name=name, email=email, username=username)
+        location_x = form.location_x.data
+        location_y = form.location_y.data
+        tel = form.tel.data
+        user = User(name=name, email=email, username=username, location_x=location_x, location_y=location_y, tel=tel)
         user.set_password(password)
         db.session.add(user)
+        db.session.commit()
+        rider = Rider(user=user)
+        db.session.add(rider)
         db.session.commit()
         token = generate_token(user=user, operation='confirm')
         send_confirm_email(user=user, token=token)

@@ -10,7 +10,22 @@
         <div class="col-md-12">
             {% if orders %}
                 {% for order in orders %}
-                    {{ order_card(order) }}
+                    <div>
+                        <a class="navbar-brand" href="{{ url_for('user.show_order', order_id=order.id) }}">
+                            <span class="oi oi-yen"></span>{{ order.dish.price }}*{{ order.number }}
+                            {% if order.is_prepared %}
+                                商品已完成
+                            {% else %}
+                                {% if current_user.is_authenticated and order.shop.user == current_user %}
+                                    <form class="inline" method="post"
+                                          action="{{ url_for('shop.finish_order', order_id=order.id) }}">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-primary btn-sm">Prepared</button>
+                                    </form>
+                                {% endif %}
+                            {% endif %}
+                        </a>
+                    </div>
                 {% endfor %}
             {% else %}
                 <div class="tip text-center">
