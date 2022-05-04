@@ -6,8 +6,7 @@
         </a>
     </div>
     <div class="msg" >
-        <span class="nickname">{{ order.consumer.name }}</span>
-        <small class="timestamp">{{ moment(order.start_time).format('lll') }}</small>
+        <span class="nickname">{{ order.consumer.name }}</span><span class="oi oi-yen" style="color:red; left:120px; font-size: large">{{ order.fare }}</span>
         <div>
             订单号 <a href="{{ url_for('user.show_order', order_id=order.id) }}">{{ order.id }}</a>
         </div>
@@ -21,14 +20,13 @@
                 商家已完成菜品
             {% endif %}
         </div>
-        <span class="oi oi-yen"></span>{{ order.fare }}
-        <span class="message-body">FROM <span style="color: #aa0101">{{ order.consumer.location_x }} | {{ order.consumer.location_y }}</span></span>
-        <span class="message-body">TO <span style="color: #aa0101">{{ order.shop.location_x }} | {{ order.shop.location_y }}</span></span>
+        <span class="message-body">From <span style="color: #aa0101"> {{ order.consumer.location_x }} | {{ order.consumer.location_y }}</span></span>
+        <span class="message-body">To <span style="color: #aa0101">   {{ order.shop.location_x }} | {{ order.shop.location_y }}</span></span>
 
         {% if current_user.is_authenticated %}
             <div class="item delete-button"
                 data-href="{{ url_for('delivery.accept_delivery', order_id=order.id) }}"
-                onclick="confirm('Are you sure?')">
+                onclick="confirm('您确定要接单吗?')">
                 <button class="ui button orange approve" id="accept-submit" type="button">接单</button>
             </div>
         {% endif %}

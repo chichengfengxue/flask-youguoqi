@@ -1,0 +1,13 @@
+<div class="msg-box">
+    <div class="picture">
+        <a href="{{ url_for('user.index', username=message.author.username) }}" >
+            <img class="pop-card" data-position="right center" data-offset="-40"
+                 src="{{ url_for('main.get_avatar', filename=message.author.avatar_s) }}">
+        </a>
+    </div>
+    <div class="msg" >
+        <span class="nickname">{{ message.author.name }}</span>
+        <small class="timestamp">{{ moment(message.timestamp).format('lll') }}</small>
+        <span class="message-body">{{ message.body|safe }}</span>
+    </div>
+</div>

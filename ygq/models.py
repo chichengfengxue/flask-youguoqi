@@ -61,6 +61,8 @@ class User(db.Model, UserMixin):
                                 lazy='dynamic', cascade='all')  # 关注者
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id], back_populates='followed',
                                 lazy='dynamic', cascade='all')  # 被关注者
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'))
+    room = db.relationship('Room', back_populates='users')
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
@@ -121,6 +123,14 @@ class User(db.Model, UserMixin):
         self.avatar_m = filenames[1]
         self.avatar_l = filenames[2]
         db.session.commit()
+
+
+class Room(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30))
+    token = db.Column(db.String(100))
+    users = db.relationship('User', back_populates='room')
+    messages = db.relationship('Message', back_populates='room', cascade='all')
 
 
 class Shop(db.Model):
@@ -206,7 +216,6 @@ class Tag(db.Model):
     """商品标签"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), index=True, unique=True)
-
     dishes = db.relationship('Dish', secondary=tagging, back_populates='tags')
 
 
@@ -253,6 +262,8 @@ class Message(db.Model):
     author = db.relationship('User', back_populates='messages')
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
     dish = db.relationship('Dish', back_populates='messages')
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), default=0)
+    room = db.relationship('Room', back_populates='messages')
 
 
 @db.event.listens_for(User, 'after_delete', named=True)

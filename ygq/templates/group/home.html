@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% block head %}
-        <title>交流空间 - YouGuoQi</title>
+        <title>{{ room }} - YouGuoQi</title>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         {% block styles %}
             <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
@@ -58,16 +58,15 @@
                     <a class="nav-item nav-link" href="{{ url_for('main.show_notifications') }}">
                         <span class="oi oi-bell"></span>
                     </a>
-                    {% if current_user.shops %}
-                    <a class="nav-item nav-link" href="{{ url_for('shop.upload', shop_id=current_user.shops[0].id) }}" title="Upload">
-                        <span class="oi oi-cloud-upload"></span>&nbsp;&nbsp;
-                    </a>
-                    {% endif %}
+{#                    {% if current_user.shops %}#}
+{#                    <a class="nav-item nav-link" href="{{ url_for('shop.upload', shop_id=current_user.shops[0].id) }}" title="Upload">#}
+{#                        <span class="oi oi-cloud-upload"></span>&nbsp;&nbsp;#}
+{#                    </a>#}
+{#                    {% endif %}#}
                     <div class="dropdown nav-item">
                         <a href="{{ url_for('user.index', username=current_user.username) }}" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button"
                            aria-expanded="false">
-                            <img class="avatar-xs"
-                                 src="{{ url_for('main.get_avatar', filename=current_user.avatar_s) }}">
+                            <img class="avatar-xs" src="{{ url_for('main.get_avatar', filename=current_user.avatar_s) }}">
                             <span class="caret"></span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" role="menu">
@@ -95,10 +94,10 @@
 {% endblock %}
 
 {#<div class="pusher">#}
-    <div class="chat-box" style="height: 120%">
+    <div class="chat-box">
         <div class="messages">
             <div class="ui text loader">Loading messages...</div>
-            {% include 'chat/_messages.html' %}
+            {% include 'group/_messages.html' %}
         </div>
     </div>
     <div class="input-area" style="width: 50% ;left: 50%">
@@ -107,12 +106,16 @@
                 <label class="form-control-label" for="message-textarea">Message</label>
                 <textarea class="form-control" id="message-textarea" name="body" required=""></textarea>
             </div>
-            <div class="form-group required">
-                <label class="form-control-label" for="dish-id">Dish_id</label>
-                <input class="form-control" id="dish-id" name="name" required="" type="number" value="">
-            </div>
-            <button class="ui button orange approve" id="meg-submit" type="button">发送</button>
+            <button class="ui button orange approve" id="group-meg-submit" type="button">发送</button>
 {#        </form>#}
+    </div>
+    <div class="input-area" style="width: 50% ;right: 50%">
+    user:
+        {% for user in users %}
+        <div>
+            {{ user }}
+        </div>
+        {% endfor %}
     </div>
 {#
 {#</div>#}
@@ -132,13 +135,16 @@
     <script src="{{ url_for('static', filename='semantic-ui/semantic.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/forms.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/script_socket.js') }}"></script>
+{#    <script src="{{ url_for('static', filename='js/script_socket.js') }}"></script>#}
+    <script src="{{ url_for('static', filename='js/socket_room.js') }}"></script>
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     {{ moment.include_moment(local_js=url_for('static', filename='js/moment-with-locales.min.js')) }}
     <script type="text/javascript">
-        var root_url = "{{ url_for('chat.home') }}";
-        var messages_url = "{{ url_for('chat.get_messages') }}";
+        var root_url = "{{ url_for('group.home', room_id=room) }}";
+        var room_id = {{ room }};
+        var messages_url = "{{ url_for('group.get_messages', room_id=room) }}";
         var current_user_id = {{ current_user.id|default(0) }};
+        var current_user_username = {{ current_user.username|default(0) }};
         var csrf_token = "{{ csrf_token() }}";
 
         {% if current_user.is_authenticated %}
@@ -147,7 +153,7 @@
             var is_authenticated = false;
         {% endif %}
 
-        var socket = io();
+        var socket = io('/group');
 
     </script>
 {% endblock %}

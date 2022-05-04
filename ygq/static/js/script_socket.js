@@ -48,6 +48,8 @@ $(document).ready(function () {
     }
 
     $('.messages').scroll(load_messages);
+
+
     // 插入新消息
     socket.on('new message', function (data) {
         // message_count++;
@@ -63,6 +65,14 @@ $(document).ready(function () {
         activateSemantics();
     });
 
+    // // 插入新房间消息
+    // socket.on('new room message', function (data) {
+    //     $('.messages').append(data.message_html);
+    //     flask_moment_render_all();
+    //     scrollToBottom();
+    //     activateSemantics();
+    // });
+
     // 插入新配送订单
     socket.on('new delivery', function (data) {
         $('.messages').append(data.message_html);
@@ -71,6 +81,23 @@ $(document).ready(function () {
         activateSemantics();
     });
 
+    // // 打印状态信息
+    // socket.on('status', function(data) {
+    //     $('.messages').append(data.message_html);
+    //     flask_moment_render_all();
+    //     alert(data.message_html);
+    //     scrollToBottom();
+    //     activateSemantics();
+    // });
+
+
+
+
+    // // 打印消息
+    // socket.on('message', function(data) {
+    //     $('#chat').val($('#chat').val() + data.msg + '\n');
+    //     $('#chat').scrollTop($('#chat')[0].scrollHeight);
+    // });
 
     // function new_message(e) {
     //     var $textarea = $('#message-textarea');
@@ -108,6 +135,17 @@ $(document).ready(function () {
             $('#fare').val('');
         }
     });
+
+
+    // // 提交新群聊消息
+    // $('#group-meg-submit').on('click', function () {
+    //     var $message_textarea = $('#message-textarea');
+    //     var message = $message_textarea.val();
+    //     if (message.trim() !== '') {
+    //         socket.emit('room_message', message, room_id);
+    //         $message_textarea.val('');
+    //     }
+    // });
 
 
     // 接单

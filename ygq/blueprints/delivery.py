@@ -16,7 +16,7 @@ delivery_bp = Blueprint('delivery', __name__)
 def home():
     amount = current_app.config['YGQ_MESSAGE_PER_PAGE']
     orders = Order.query.filter_by(is_accept=False).order_by(Order.start_time.asc())[-amount:]
-    current_order = Order.query.filter(and_(Order.consumer_id == current_user.id, Order.is_accept == False)).first()
+    current_order = Order.query.filter(and_(Order.consumer_id == current_user.id, Order.is_accept==False)).first()
     return render_template('delivery/home.html', orders=orders, current_order=current_order)
 
 
@@ -49,6 +49,7 @@ def new_delivery(order_id, fare):
     order = Order.query.get_or_404(order_id)
     if current_user.id != order.consumer_id or order.is_accept:
         abort(403)
+    order.price = order.number*order.dish.price+int(fare)
     order.fare = int(fare)
     db.session.commit()
 
@@ -57,4 +58,5 @@ def new_delivery(order_id, fare):
           'avatar_raw': current_user.avatar_raw,
           'name': current_user.name,
           'user_id': current_user.id},
-         broadcast=True, namespace='/delivery')
+         broadcast=True,
+         namespace='/delivery')

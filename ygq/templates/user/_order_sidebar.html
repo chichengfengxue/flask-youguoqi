@@ -19,18 +19,11 @@
 <div class="card bg-light mb-3 w-100">
     <div class="card-body">
         <div id="description">
-            <p>
-                <a href="{{ url_for('main.show_dish', dish_id=order.dish_id) }}">{{ order.dish.name }}</a>
-            </p>
-            <p>
-                <span class="oi oi-yen"></span> {{ order.price }}
-            </p>
-            <p>
-                数量 {{ order.number }}
-            </p>
-            <p>
-                开始时间 <span class="oi oi-clock"></span>  {{ order.start_time }}
-            </p>
+            <p><a href="{{ url_for('main.show_dish', dish_id=order.dish_id) }}">{{ order.dish.name }}</a></p>
+            <p><span class="oi oi-yen"></span> {{ order.price }}</p>
+            <p>数量 {{ order.number }}</p>
+            <p>运费 {{ order.fare }}</p>
+            <p>开始时间 <span class="oi oi-clock"></span>  {{ order.start_time }}</p>
 
             {% if not order.is_prepared %}
                 <div>商家 <a href="{{ url_for('shop.index', shop_id=order.shop.id) }}">{{ order.shop.name }}</a> 正在准备商品...</div>

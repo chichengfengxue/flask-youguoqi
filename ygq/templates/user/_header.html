@@ -1,4 +1,4 @@
-{% from 'macros.html' import follow_area with context %}
+{% from 'macros.html' import follow_area, start_group with context %}
 {% from 'bootstrap/nav.html' import render_nav_item %}
 
 
@@ -15,6 +15,7 @@
         </h1>
         <div>
             <div class="float-right">
+                {{ start_group(user) }}
                 {{ follow_area(user) }}
                 {% if current_user.is_authenticated and user == current_user %}
                     <a class="btn btn-outline-primary btn-sm" href="{{ url_for('.edit_profile') }}">Edit profile</a>

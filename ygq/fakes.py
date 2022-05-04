@@ -160,6 +160,7 @@ def fake_delivery(count=100):
             fare=fare,
             start_time=start_time,
             dish=dish,
+            number=number,
             shop=dish.shop,
             is_finish=False,
             is_accept=False,

@@ -14,6 +14,7 @@ from .blueprints.rider import rider_bp
 from .blueprints.shop import shop_bp
 from .blueprints.user import user_bp
 from .blueprints.chat import chat_bp
+from .blueprints.group import group_bp
 
 from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio
 from .fakes import fake_delivery
@@ -61,6 +62,7 @@ def register_blueprints(app):
     app.register_blueprint(shop_bp, url_prefix='/shop')
     app.register_blueprint(chat_bp, url_prefix='/chat')
     app.register_blueprint(delivery_bp, url_prefix='/delivery')
+    app.register_blueprint(group_bp, url_prefix='/group')
     # app.register_blueprint(admin_bp, url_prefix='/admin')
     # app.register_blueprint(ajax_bp, url_prefix='/ajax')
 

@@ -1,13 +1,14 @@
-from flask import render_template, flash, redirect, url_for, current_app, request, Blueprint, abort
+from flask import render_template, flash, redirect, url_for, current_app, request, Blueprint, abort, session
 from flask_login import login_required, current_user, fresh_login_required
+from flask_socketio import rooms
 
 from ..decorators import confirm_required
 from ..emails import send_change_email_email
 from ..extensions import db, avatars
 from ..forms.user import EditProfileForm, UploadAvatarForm, CropAvatarForm, ChangeEmailForm, \
     ChangePasswordForm, DeleteAccountForm, EditOrder
-from ..models import User, Rider, Dish, Order, Collect
-from ..notifications import push_new_order_notification, push_delivered_notification
+from ..models import User, Rider, Dish, Order, Collect, Room
+from ..notifications import push_new_order_notification, push_new_group_notification, push_group_notification
 from ..settings import Operations
 from ..utils import generate_token, validate_token, redirect_back, flash_errors
 from sqlalchemy.sql.expression import func
@@ -35,18 +36,20 @@ def buy(dish_id):
     dish = Dish.query.get_or_404(dish_id)
     form = EditOrder()
     if form.validate_on_submit():
-        fare = form.fare.data
-        number = form.number.data
+        fare = int(form.fare.data)
+        number = int(form.number.data)
+        price = number*dish.price+fare+1
         order = Order(
             dish=dish,
             shop=dish.shop,
             consumer=user,
             fare=fare,
-            number=number
+            number=number,
+            price=price
         )
         db.session.add(order)
         db.session.commit()
-        flash('Order successfully.', 'success')
+        flash('下单成功！', 'success')
 
         push_new_order_notification(order, order.shop.user)
         return redirect(url_for('.show_order', order_id=order.id))
@@ -88,6 +91,22 @@ def follow(username):
     current_user.follow(user)
     flash('User followed.', 'success')
     return redirect_back()
+
+
+@user_bp.route('/group/start/<username>', methods=['POST'])
+@login_required
+@confirm_required
+def start_group(username):
+    """发起聊天"""
+    user = User.query.filter_by(username=username).first_or_404()
+    room = Room(name=current_user.username+' 和 '+username+' 的聊天')
+    db.session.add(room)
+    db.session.commit()
+    session['username'] = username
+    session['room'] = room.id
+    push_new_group_notification(current_user.username, room.id, user)
+    push_group_notification(room.id, current_user._get_current_object())
+    return redirect(url_for('group.home', room_id=room.id))
 
 
 @user_bp.route('/unfollow/<username>', methods=['POST'])
