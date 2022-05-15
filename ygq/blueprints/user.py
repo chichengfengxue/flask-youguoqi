@@ -236,7 +236,6 @@ def change_email(token):
 
 
 @user_bp.route('/settings/account/delete', methods=['GET', 'POST'])
-@fresh_login_required
 def delete_account():
     form = DeleteAccountForm()
     if form.validate_on_submit():

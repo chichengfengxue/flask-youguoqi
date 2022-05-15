@@ -53,6 +53,8 @@ def inactive(rider_id):
 @confirm_required
 def finish_order(order_id):
     order = Order.query.get_or_404(order_id)
+    if not order.rider:
+        abort(403)
     if current_user != order.rider.user:
         abort(403)
     order.is_finish = True

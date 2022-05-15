@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, request, Blueprint, curren
 from flask_login import current_user, login_required
 from flask_socketio import emit, join_room, leave_room, rooms
 
+from ..decorators import confirm_required
 from ..extensions import socketio, db
 from ..models import Message, User, Dish, Room
 from ..utils import to_html
@@ -11,6 +12,7 @@ group_bp = Blueprint('group', __name__)
 
 @group_bp.route('/<int:room_id>', methods=['GET'])
 @login_required
+@confirm_required
 def home(room_id):
     session['username'] = current_user.username
     session['room'] = room_id
@@ -22,6 +24,7 @@ def home(room_id):
 
 @group_bp.route('/messages/<int:room_id>', methods=['GET'])
 @login_required
+@confirm_required
 def get_messages(room_id):
     """返回分页消息记录"""
     room = Room.query.get_or_404(room_id)
@@ -34,6 +37,7 @@ def get_messages(room_id):
 
 @socketio.on('join', namespace='/group')
 @login_required
+@confirm_required
 def on_join():
     """加入房间"""
     username = session.get("username")
@@ -63,6 +67,7 @@ def on_join():
 
 @socketio.on('leave', namespace='/group')
 @login_required
+@confirm_required
 def on_leave():
     """退出房间"""
     username = session.get("username")
@@ -88,6 +93,7 @@ def on_leave():
 
 
 @socketio.on('room_message', namespace='/group')
+@confirm_required
 def new_room_message(message_body, room_id):
     room = Room.query.get_or_404(room_id)
     html_message = to_html(message_body)

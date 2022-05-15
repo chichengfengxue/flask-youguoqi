@@ -30,7 +30,7 @@ def load_user(user_id):
 
 
 login_manager.login_view = 'auth.login'
-login_manager.login_message = '请先登录'
+login_manager.login_message = 'Please log in to access this page.'
 login_manager.login_message_category = 'warning'
 
 login_manager.refresh_view = 'auth.re_authenticate'

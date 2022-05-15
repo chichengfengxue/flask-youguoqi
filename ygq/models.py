@@ -111,9 +111,9 @@ class User(db.Model, UserMixin):
             db.session.delete(collect)
             db.session.commit()
 
-    def is_collecting(self, photo):
+    def is_collecting(self, dish):
         """判断用户是否已经收藏图片"""
-        return Collect.query.with_parent(self).filter_by(collected_id=photo.id).first() is not None
+        return Collect.query.with_parent(self).filter_by(collected_id=dish.id).first() is not None
 
     def generate_avatar(self):
         """生成随机头像文件"""
@@ -201,8 +201,8 @@ class Dish(db.Model):
     prepare_time = db.Column(db.Integer)
     shop_id = db.Column(db.Integer, db.ForeignKey('shop.id'))
     shop = db.relationship('Shop', back_populates='dishes')
-    files = db.relationship('File', back_populates='dish')
-    orders = db.relationship('Order', back_populates='dish')
+    files = db.relationship('File', back_populates='dish', cascade='all')
+    orders = db.relationship('Order', back_populates='dish', cascade='all')
     comments = db.relationship('Comment', back_populates='dish', cascade='all')
     collectors = db.relationship('Collect', back_populates='collected', cascade='all')
     tags = db.relationship('Tag', secondary=tagging, back_populates='dishes')
@@ -278,8 +278,8 @@ def delete_avatars(**kwargs):
 
 
 @db.event.listens_for(Dish, 'after_delete', named=True)
-def delete_photos(**kwargs):
-    """图片删除事件监听函数"""
+def delete_dishes(**kwargs):
+    """商品删除事件监听函数"""
     target = kwargs['target']
     for file in target.files:
         path = os.path.join(current_app.config['YGQ_UPLOAD_PATH'], file.filename)

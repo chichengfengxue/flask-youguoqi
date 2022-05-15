@@ -13,6 +13,7 @@ delivery_bp = Blueprint('delivery', __name__)
 
 @delivery_bp.route('/')
 @login_required
+@confirm_required
 def home():
     amount = current_app.config['YGQ_MESSAGE_PER_PAGE']
     orders = Order.query.filter_by(is_accept=False).order_by(Order.start_time.asc())[-amount:]
@@ -22,6 +23,7 @@ def home():
 
 @delivery_bp.route('/orders')
 @login_required
+@confirm_required
 def get_orders():
     """返回分页订单记录"""
     page = request.args.get('page', 1, type=int)
@@ -44,6 +46,7 @@ def accept_delivery(order_id):
 
 @socketio.on('new delivery', namespace='/delivery')
 @login_required
+@confirm_required
 def new_delivery(order_id, fare):
     """new delivery事件处理函数"""
     order = Order.query.get_or_404(order_id)

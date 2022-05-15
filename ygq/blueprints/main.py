@@ -98,7 +98,7 @@ def collect(dish_id):
         return redirect(url_for('.show_dish', dish_id=dish_id))
 
     current_user.collect(dish)
-    flash('Photo collected.', 'success')
+    flash('Dish collected.', 'success')
     return redirect(url_for('.show_dish', dish_id=dish_id))
 
 
@@ -113,23 +113,6 @@ def uncollect(dish_id):
 
     current_user.uncollect(dish)
     flash('Dish uncollected.', 'info')
-    return redirect(url_for('.show_dish', dish_id=dish_id))
-
-
-@main_bp.route('/dish/<int:dish_id>/description', methods=['POST'])
-@login_required
-def edit_description(dish_id):
-    dish = Dish.query.get_or_404(dish_id)
-    if current_user != dish.shop.user:
-        abort(403)
-
-    form = DescriptionForm()
-    if form.validate_on_submit():
-        dish.description = form.description.data
-        db.session.commit()
-        flash('Description updated.', 'success')
-
-    flash_errors(form)
     return redirect(url_for('.show_dish', dish_id=dish_id))
 
 

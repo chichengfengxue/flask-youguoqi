@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function findAll(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sortColumn(elem) {
+    toggleSortStates(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('result')) {
+        key = keyResult;
+    } else if (elem.classList.contains('links')) {
+        key = keyLink;
+    } else {
+        key = keyAlpha;
+    }
+    sortTable(elem, key(colIndex));
+}
+
+function showAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(showExtras);
+}
+
+function hideAllExtras() { // eslint-disable-line no-unused-vars
+    findAll('.col-result').forEach(hideExtras);
+}
+
+function showExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hideExtras(colresultElem) {
+    const extras = colresultElem.parentNode.nextElementSibling;
+    const expandcollapse = colresultElem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function showFilters() {
+    const filterItems = document.getElementsByClassName('filter');
+    for (let i = 0; i < filterItems.length; i++)
+        filterItems[i].hidden = false;
+}
+
+function addCollapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:showAllExtras()">Show all details</a> / ' +
+                            '<a href="javascript:hideAllExtras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    findAll('.col-result').forEach(function(elem) {
+        const collapsed = getQueryParameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                showExtras(event.currentTarget);
+            } else {
+                hideExtras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function getQueryParameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    resetSortHeaders();
+
+    addCollapse();
+
+    showFilters();
+
+    sortColumn(find('.initial-sort'));
+
+    findAll('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sortColumn(elem);
+            }, false);
+    });
+}
+
+function sortTable(clicked, keyFunc) {
+    const rows = findAll('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sortedRows = sort(rows, keyFunc, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sortedRows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, keyFunc, reversed) {
+    const sortArray = items.map(function(item, i) {
+        return [keyFunc(item), i];
+    });
+
+    sortArray.sort(function(a, b) {
+        const keyA = a[0];
+        const keyB = b[0];
+
+        if (keyA == keyB) return 0;
+
+        if (reversed) {
+            return keyA < keyB ? 1 : -1;
+        } else {
+            return keyA > keyB ? 1 : -1;
+        }
+    });
+
+    return sortArray.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function keyAlpha(colIndex) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[colIndex].firstChild.data.toLowerCase();
+    };
+}
+
+function keyLink(colIndex) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[colIndex].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function keyResult(colIndex) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[colIndex].firstChild.data);
+    };
+}
+
+function resetSortHeaders() {
+    findAll('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    findAll('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggleSortStates(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        resetSortHeaders();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function isAllRowsHidden(value) {
+    return value.hidden == false;
+}
+
+function filterTable(elem) { // eslint-disable-line no-unused-vars
+    const outcomeAtt = 'data-test-result';
+    const outcome = elem.getAttribute(outcomeAtt);
+    const classOutcome = outcome + ' results-table-row';
+    const outcomeRows = document.getElementsByClassName(classOutcome);
+
+    for(let i = 0; i < outcomeRows.length; i++){
+        outcomeRows[i].hidden = !elem.checked;
+    }
+
+    const rows = findAll('.results-table-row').filter(isAllRowsHidden);
+    const allRowsHidden = rows.length == 0 ? true : false;
+    const notFoundMessage = document.getElementById('not-found-message');
+    notFoundMessage.hidden = !allRowsHidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 15-May-2022 at 23:23:55 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.1.1</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>D:\JDK</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "1.0.0", "py": "1.11.0", "pytest": "7.1.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.19041-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"allure-pytest": "2.9.45", "cov": "3.0.0", "emoji": "0.2.0", "html": "3.1.1", "instafail": "0.4.2", "metadata": "2.0.1", "sugar": "0.9.4"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.9.4</td></tr></table>
+    <h2>Summary</h2>
+    <p>46 tests ran in 33.46 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="passed">46 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filterTable(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_login_user</td>
+          <td class="col-duration">0.54</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_fail_login</td>
+          <td class="col-duration">0.43</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_logout_user</td>
+          <td class="col-duration">0.45</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_unconfirmed_user_permission</td>
+          <td class="col-duration">0.44</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_register_account</td>
+          <td class="col-duration">0.53</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_bad_confirm_token</td>
+          <td class="col-duration">0.46</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_confirm_account</td>
+          <td class="col-duration">0.50</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_auth.py::test_reset_password</td>
+          <td class="col-duration">0.55</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_cli.py::test_initdb_command</td>
+          <td class="col-duration">0.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_cli.py::test_initdb_command_with_drop</td>
+          <td class="col-duration">0.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_cli.py::test_init_command</td>
+          <td class="col-duration">0.02</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_cli.py::test_forge_command_with_count</td>
+          <td class="col-duration">9.30</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_app_exist</td>
+          <td class="col-duration">0.29</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_app_is_testing</td>
+          <td class="col-duration">0.27</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_404_error</td>
+          <td class="col-duration">0.37</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_index_page</td>
+          <td class="col-duration">0.47</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_explore_page</td>
+          <td class="col-duration">0.33</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_search</td>
+          <td class="col-duration">0.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_show_notifications</td>
+          <td class="col-duration">0.41</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_show_dish</td>
+          <td class="col-duration">0.63</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_collect</td>
+          <td class="col-duration">0.61</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_uncollect</td>
+          <td class="col-duration">0.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_new_comment</td>
+          <td class="col-duration">0.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_reply_comment</td>
+          <td class="col-duration">0.55</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_main.py::test_show_tag</td>
+          <td class="col-duration">0.44</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_rider.py::test_index_page</td>
+          <td class="col-duration">0.36</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_rider.py::test_finish_order</td>
+          <td class="col-duration">0.57</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>b&#x27;\n&lt;!DOCTYPE html&gt;\n&lt;html lang=&quot;zh&quot;&gt;\n&lt;head&gt;\n    &lt;meta charset=&quot;utf-8&quot;&gt;\n    &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1, shrink-to-fit=no&quot;&gt;\n        &lt;title&gt;Home - YouGuoQi&lt;/title&gt;\n        &lt;link rel=&quot;shortcut icon&quot; href=&quot;/static/favicon.ico&quot;&gt;\n            &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/css/bootstrap.min.css&quot;&gt;\n            &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/open-iconic/font/css/open-iconic-bootstrap.css&quot;&gt;\n            &lt;link rel=&quot;stylesheet&quot; href=&quot;/static/css/style.css&quot;&gt;\n&lt;/head&gt;\n\n&lt;body&gt;\n    &lt;nav class=&quot;navbar navbar-expand-lg navbar-light bg-light&quot;&gt;\n        &lt;div class=&quot;container&quot;&gt;\n            &lt;a class=&quot;navbar-brand&quot; href=&quot;/&quot;&gt;\n                &lt;img src=&quot;/static/favicon.ico&quot; alt=&quot;YouGuoQi&quot;&gt;\n            &lt;/a&gt;\n            &lt;button class=&quot;navbar-toggler&quot; type=&quot;button&quot; data-toggle=&quot;collapse&quot; data-target=&quot;#navbarColor01&quot;\n                    aria-controls=&quot;navbarColor01&quot; aria-expanded=&quot;false&quot; aria-label=&quot;Toggle navigation&quot;&gt;\n                &lt;span class=&quot;navbar-toggler-icon&quot;&gt;&lt;/span&gt;\n            &lt;/button&gt;\n\n            &lt;div class=&quot;collapse navbar-collapse&quot; id=&quot;navbarColor01&quot;&gt;\n                &lt;div class=&quot;navbar-nav mr-auto&quot;&gt;\n                        &lt;a class=&quot;nav-item nav-link active&quot;\n       href=&quot;/&quot;&gt;\n        Home    &lt;/a&gt;\n\n                        &lt;a class=&quot;nav-item nav-link &quot;\n       href=&quot;/explore&quot;&gt;\n        Explore    &lt;/a&gt;\n\n                                &lt;a class=&quot;nav-item nav-link &quot;\n       href=&quot;/shop/apply/unconfirmed&quot;&gt;\n        Shop    &lt;/a&gt;\n\n                                &lt;a class=&quot;nav-item nav-link &quot;\n       href=&quot;/rider/2&quot;&gt;\n        Rider    &lt;/a&gt;\n\n                        &lt;a class=&quot;nav-item nav-link &quot;\n       href=&quot;/chat/&quot;&gt;\n        Chat    &lt;/a&gt;\n\n                        &lt;a class=&quot;nav-item nav-link &quot;\n       href=&quot;/delivery/&quot;&gt;\n        Delivery    &lt;/a&gt;\n\n                    &lt;form class=&quot;form-inline my-2 my-lg-0&quot; action=&quot;/search&quot;&gt;\n                        &lt;input type=&quot;text&quot; name=&quot;q&quot; class=&quot;form-control mr-sm-1&quot; placeholder=&quot;Dish, tag or user&quot;\n                               required&gt;\n                        &lt;button class=&quot;btn btn-light my-2 my-sm-0&quot; type=&quot;submit&quot;&gt;\n                            &lt;span class=&quot;oi oi-magnifying-glass&quot;&gt;&lt;/span&gt;\n                        &lt;/button&gt;\n                    &lt;/form&gt;\n                &lt;/div&gt;\n\n                &lt;div class=&quot;navbar-nav ml-auto&quot;&gt;\n                    &lt;a class=&quot;nav-item nav-link&quot; href=&quot;/notifications&quot;&gt;\n                        &lt;span class=&quot;oi oi-bell&quot;&gt;&lt;/span&gt;\n                    &lt;/a&gt;\n                    &lt;div class=&quot;dropdown nav-item&quot;&gt;\n                        &lt;a href=&quot;#&quot; class=&quot;nav-link dropdown-toggle&quot; data-toggle=&quot;dropdown&quot; role=&quot;button&quot;\n                           aria-expanded=&quot;false&quot;&gt;\n                            &lt;img class=&quot;avatar-xs&quot;\n                                 src=&quot;/avatars/unconfirmed_s.png&quot;&gt;\n                            &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;\n                        &lt;/a&gt;\n                        &lt;div class=&quot;dropdown-menu dropdown-menu-right&quot; role=&quot;menu&quot;&gt;\n                            &lt;h6 class=&quot;dropdown-header&quot;&gt;Logged in as unconfirmed&lt;/h6&gt;\n                            &lt;a class=&quot;dropdown-item&quot; href=&quot;/user/unconfirmed&quot;&gt;\n                                &lt;span class=&quot;oi oi-person&quot;&gt;&lt;/span&gt; My Home\n                            &lt;/a&gt;\n                            &lt;div class=&quot;dropdown-divider&quot;&gt;&lt;/div&gt;\n                            &lt;a class=&quot;dropdown-item&quot; href=&quot;/user/settings/profile&quot;&gt;\n                                &lt;span class=&quot;oi oi-cog&quot;&gt;&lt;/span&gt; Settings\n                            &lt;/a&gt;\n                            &lt;a class=&quot;dropdown-item&quot; href=&quot;/auth/logout&quot;&gt;\n                                &lt;span class=&quot;oi oi-power-standby&quot;&gt;&lt;/span&gt; Logout\n                            &lt;/a&gt;\n                        &lt;/div&gt;\n                    &lt;/div&gt;\n                &lt;/div&gt;\n            &lt;/div&gt;\n        &lt;/div&gt;\n    &lt;/nav&gt;\n\n&lt;main&gt;\n    &lt;div class=&quot;container&quot;&gt;\n&lt;div class=&quot;row justify-content-md-center&quot;&gt;\n    &lt;div class=&quot;col-md-8&quot;&gt;\n                &lt;div class=&quot;card mb-3 w-100 bg-light&quot;&gt;\n                    &lt;div class=&quot;card-header&quot;&gt;\n                        &lt;a class=&quot;dead-link&quot; href=&quot;/shop/1&quot;&gt;\n                            &lt;img class=&quot;rounded img-fluid avatar-s profile-popover&quot;\n                                 src=&quot;/avatars/user_m.png&quot;&gt;\n                        &lt;/a&gt;\n                        &lt;a class=&quot;profile-popover trend-card-avatar&quot;\n                           href=&quot;/shop/1&quot;&gt;FzuHotel&lt;/a&gt;\n                        &lt;span class=&quot;float-right&quot;&gt;\n            &lt;small data-toggle=&quot;tooltip&quot; data-placement=&quot;top&quot; data-timestamp=&quot;2022-05-15 15:23:42.789568&quot;\n                   data-delay=&quot;500&quot;&gt;\n                &lt;span class=&quot;flask-moment&quot; data-timestamp=&quot;2022-05-15T15:23:42Z&quot; data-format=&quot;fromNow(0)&quot; data-refresh=&quot;60000&quot; style=&quot;display: none&quot;&gt;2022-05-15T15:23:42Z&lt;/span&gt;&lt;/small&gt;&lt;/span&gt;\n                    &lt;/div&gt;\n                    &lt;div class=&quot;card-body&quot;&gt;\n                        &lt;div class=&quot;&quot; align=&quot;center&quot;&gt;\n                            &lt;a class=&quot;thumbnail&quot; href=&quot;/dish/1&quot;\n                               target=&quot;_blank&quot;&gt;\n                                &lt;img class=&quot;img-fluid&quot;\n                                     src=&quot;/uploads/test.jpg&quot;&gt;\n                            &lt;/a&gt;\n                        &lt;/div&gt;\n                    &lt;/div&gt;\n                    &lt;div class=&quot;card-footer&quot;&gt;\n                        &lt;div&gt;\n                            FoTiaoQiang\n                        &lt;/div&gt;\n                        &lt;span class=&quot;oi oi-yen&quot;&gt;&lt;/span&gt; 998\n                        &lt;span class=&quot;oi oi-star&quot;&gt;&lt;/span&gt;\n                        &lt;span id=&quot;collectors-count-1&quot;&gt;\n                            0\n                        &lt;/span&gt;\n                        &lt;span class=&quot;oi oi-comment-square&quot;&gt;&lt;/span&gt; 1\n                        1\xe4\xba\xba\xe4\xbb\x98\xe6\xac\xbe\n                        &lt;div class=&quot;float-right&quot;&gt;\n                                &lt;button class=&quot;hide                                 btn btn-outline-secondary btn-sm uncollect-btn&quot;\n                                        data-id=&quot;1&quot;&gt;\n                                    &lt;span class=&quot;oi oi-x&quot;&gt;&lt;/span&gt; Uncollect\n                                &lt;/button&gt;\n                                &lt;button class=&quot;                                 btn btn-outline-primary btn-sm collect-btn&quot;\n                                        data-id=&quot;1&quot;&gt;\n                                    &lt;span class=&quot;oi oi-star&quot;&gt;&lt;/span&gt; Collect\n                                &lt;/button&gt;\n                        &lt;/div&gt;\n                            &lt;p class=&quot;card-text&quot;&gt;\xe4\xbd\x9b\xe8\xb7\xb3\xe5\xa2\x99\xe5\x8f\x88\xe5\x90\x8d\xe7\xa6\x8f\xe5\xaf\xbf\xe5\x85\xa8\xef\xbc\x8c\xe6\x98\xaf\xe7\xa6\x8f\xe5\xbb\xba\xe7\x9c\x81\xe7\xa6\x8f\xe5\xb7\x9e\xe5\xb8\x82\xe7\x9a\x84\xe4\xb8\x80\xe9\x81\x93\xe7\x89\xb9\xe8\x89\xb2\xe5\x90\x8d\xe8\x8f\x9c\xef\xbc\x8c\xe5\xb1\x9e\xe9\x97\xbd\xe8\x8f\x9c\xe7\xb3\xbb\xe3\x80\x82&lt;/p&gt;\n                    &lt;/div&gt;\n                &lt;/div&gt;\n    &lt;/div&gt;\n    &lt;div class=&quot;col-md-3&quot;&gt;\n&lt;div class=&quot;card bg-light mb-3 w-100 sidebar-nav&quot;&gt;\n    &lt;div class=&quot;card-body&quot;&gt;\n        &lt;div class=&quot;row&quot;&gt;\n            &lt;a href=&quot;/user/unconfirmed&quot;&gt;\n                &lt;img class=&quot;rounded avatar-s&quot; style=&quot;margin-left: 15px; position: absolute&quot;\n                     src=&quot;/avatars/unconfirmed_m.png&quot;&gt;\n            &lt;/a&gt;\n            &lt;div class=&quot;sidebar-nav-name&quot;&gt;\n                &lt;h6 class=&quot;card-title&quot;&gt;&lt;a\n                        href=&quot;/user/unconfirmed&quot;&gt;unconfirmed\n                &lt;/a&gt;&lt;/h6&gt;\n                &lt;p class=&quot;card-subtitle mb-2 text-muted&quot;&gt;unconfirmed&lt;/p&gt;\n            &lt;/div&gt;\n        &lt;/div&gt;\n        &lt;a class=&quot;card-link&quot; href=&quot;/user/unconfirmed&quot;&gt;\n            &lt;span class=&quot;oi oi-home&quot;&gt;&lt;/span&gt; My Dishes\n        &lt;/a&gt;&lt;br&gt;\n        &lt;a class=&quot;card-link&quot; href=&quot;/user/unconfirmed/collections&quot;&gt;\n            &lt;span class=&quot;oi oi-star&quot;&gt;&lt;/span&gt; My Collections\n        &lt;/a&gt;\n    &lt;/div&gt;\n&lt;/div&gt;\n&lt;div class=&quot;card bg-light mb-3 w-100&quot;&gt;\n    &lt;div class=&quot;card-header&quot;&gt;Hot Tags&lt;/div&gt;\n    &lt;div class=&quot;list-group&quot;&gt;\n            &lt;a class=&quot;list-group-item&quot; href=&quot;/tag/1&quot;&gt;test tag\n                &lt;span class=&quot;badge badge-pill&quot;&gt;1&lt;/span&gt;\n            &lt;/a&gt;\n    &lt;/div&gt;\n&lt;/div&gt;    &lt;/div&gt;\n&lt;/div&gt;\n                &lt;nav aria-label=&quot;Page navigation&quot;&gt;\n                &lt;ul class=&quot;paginationjustify-content-center&quot;&gt;\n&lt;li class=&quot;page-item disabled&quot;&gt;\n                            &lt;a class=&quot;page-link&quot; href=&quot;#&quot;&gt;&amp;laquo;&lt;/a&gt;\n                        &lt;/li&gt;                                &lt;li class=&quot;page-item active&quot;&gt;\n                                    &lt;a class=&quot;page-link&quot; href=&quot;#&quot;&gt;1 &lt;span class=&quot;sr-only&quot;&gt;(current)&lt;/span&gt;&lt;/a&gt;\n                                &lt;/li&gt;\n\n&lt;li class=&quot;page-item disabled&quot;&gt;\n                            &lt;a class=&quot;page-link&quot; href=&quot;#&quot;&gt;&amp;raquo;&lt;/a&gt;\n                        &lt;/li&gt;&lt;/ul&gt;\n            &lt;/nav&gt;\n\n    &lt;div class=&quot;jumbotron&quot;&gt;\n        &lt;div class=&quot;row&quot;&gt;\n            &lt;div class=&quot;col-md-8&quot;&gt;\n                &lt;img src=&quot;/static/images/index.jpg&quot; class=&quot;rounded img-fluid&quot;&gt;\n            &lt;/div&gt;\n            &lt;div class=&quot;col-md-4 align-self-center&quot;&gt;\n                &lt;h1&gt;YouGuoQi&lt;/h1&gt;\n                &lt;p&gt;Capture and remember every wonderful moment.&lt;/p&gt;\n                &lt;p&gt;&lt;a class=&quot;btn btn-primary btn-lg&quot; href=&quot;/auth/register&quot;&gt;Join Now&lt;/a&gt;&lt;/p&gt;\n            &lt;/div&gt;\n        &lt;/div&gt;\n    &lt;/div&gt;\n            &lt;footer&gt;\n                &lt;p class=&quot;float-left&quot;&gt;\n                    &lt;small&gt;&amp;copy; 2022\n                        &lt;a href=&quot;https://github.com/chichengfengxue/flask-youguoqi&quot; title=&quot;Fork me on GitHub&quot;&gt;GitHub&lt;/a&gt;\n                    &lt;/small&gt;\n                &lt;/p&gt;\n                &lt;p class=&quot;float-right&quot;&gt;\n                    &lt;small&gt;\xe6\x9c\x89\xe9\x94\x85\xe6\xb0\x94&lt;/small&gt;\n                &lt;/p&gt;\n            &lt;/footer&gt;\n    &lt;/div&gt;\n&lt;/main&gt;\n&lt;div id=&quot;toast&quot;&gt;&lt;/div&gt;\n\n    &lt;script src=&quot;/static/js/jquery.min.js&quot;&gt;&lt;/script&gt;\n    &lt;script src=&quot;/static/js/popper.min.js&quot;&gt;&lt;/script&gt;\n    &lt;script src=&quot;/static/js/bootstrap.min.js&quot;&gt;&lt;/script&gt;\n    &lt;script src=&quot;/static/js/moment-with-locales.min.js&quot;&gt;&lt;/script&gt;\n&lt;script&gt;\nmoment.locale(&quot;en&quot;);\nfunction flask_moment_render(elem) {\n    $(elem).text(eval(\&#x27;moment(&quot;\&#x27; + $(elem).data(\&#x27;timestamp\&#x27;) + \&#x27;&quot;).\&#x27; + $(elem).data(\&#x27;format\&#x27;) + \&#x27;;\&#x27;));\n    $(elem).removeClass(\&#x27;flask-moment\&#x27;).show();\n}\nfunction flask_moment_render_all() {\n    $(\&#x27;.flask-moment\&#x27;).each(function() {\n        flask_moment_render(this);\n        if ($(this).data(\&#x27;refresh\&#x27;)) {\n            (function(elem, interval) { setInterval(function() { flask_moment_render(elem) }, interval); })(this, $(this).data(\&#x27;refresh\&#x27;));\n        }\n    })\n}\n$(document).ready(function() {\n    flask_moment_render_all();\n});\n&lt;/script&gt;\n    &lt;script src=&quot;/static/js/script.js&quot;&gt;&lt;/script&gt;\n    &lt;script type=&quot;text/javascript&quot;&gt;\n        var csrf_token = &quot;IjI4YjYxMTVkODBlODFiYjc3MjhjM2Q4ZTAxYzdhYmJlOGE1ZWUwOTUi.FWKsfg.i2OODBplGWBjkCEEN17SmXq9Sa0&quot;;\n            var is_authenticated = true;\n    &lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;&#x27;
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_index_page</td>
+          <td class="col-duration">0.38</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_show_orders</td>
+          <td class="col-duration">0.36</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_apply2shop</td>
+          <td class="col-duration">0.50</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_delete_dish</td>
+          <td class="col-duration">0.53</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_new_dish</td>
+          <td class="col-duration">0.66</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_edit_description</td>
+          <td class="col-duration">0.73</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_new_tag</td>
+          <td class="col-duration">0.82</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_shop.py::test_finish_order</td>
+          <td class="col-duration">0.52</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_index_page</td>
+          <td class="col-duration">0.37</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_show_collections</td>
+          <td class="col-duration">0.46</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_follow</td>
+          <td class="col-duration">0.68</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_unfollow</td>
+          <td class="col-duration">0.68</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_show_followers</td>
+          <td class="col-duration">0.45</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_edit_profile</td>
+          <td class="col-duration">0.47</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_change_avatar</td>
+          <td class="col-duration">1.59</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_upload_avatar</td>
+          <td class="col-duration">0.77</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_change_password</td>
+          <td class="col-duration">0.65</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_change_email</td>
+          <td class="col-duration">0.59</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">tests/test_user.py::test_delete_account</td>
+          <td class="col-duration">0.52</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="empty log">No log output captured.</div></td></tr></tbody></table></body></html>

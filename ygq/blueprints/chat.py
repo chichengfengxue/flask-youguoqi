@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, request, Blueprint, curren
 from flask_login import current_user, login_required
 from flask_socketio import emit
 
+from ..decorators import confirm_required
 from ..extensions import socketio, db
 from ..models import Message, User, Dish
 from ..utils import to_html
@@ -13,6 +14,7 @@ online_users = []
 
 @socketio.on('new message')
 @login_required
+@confirm_required
 def new_message(message_body, dish_id=None):
     """new message事件处理函数"""
     html_message = to_html(message_body)
@@ -34,6 +36,7 @@ def new_message(message_body, dish_id=None):
 
 @chat_bp.route('/')
 @login_required
+@confirm_required
 def home():
     amount = current_app.config['YGQ_MESSAGE_PER_PAGE']
     messages = Message.query.filter_by(room_id=0).order_by(Message.timestamp.asc())[-amount:]
@@ -42,6 +45,7 @@ def home():
 
 @chat_bp.route('/messages')
 @login_required
+@confirm_required
 def get_messages():
     """返回分页消息记录"""
     page = request.args.get('page', 1, type=int)

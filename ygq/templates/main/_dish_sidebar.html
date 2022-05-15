@@ -90,7 +90,7 @@
         </div>
         {% if current_user == dish.shop.user %}
             <div id="description-form">
-                <form action="{{ url_for('.edit_description', dish_id=dish.id) }}" method="post">
+                <form action="{{ url_for('shop.edit_description', dish_id=dish.id) }}" method="post">
                     {{ description_form.csrf_token }}
                     {{ render_field(description_form.description) }}
                     <a class="btn btn-light btn-sm" id="cancel-description">Cancel</a>

@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 
 from ..decorators import confirm_required
 from ..extensions import db
-from ..forms.shop import DishForm, Apply2Shop, TagForm
+from ..forms.shop import DishForm, Apply2Shop, TagForm, DescriptionForm
 from ..models import User, Dish, Shop, File, Tag, Order
 from ..utils import redirect_back, rename_file, flash_errors, is_image
 
@@ -67,12 +67,13 @@ def apply2shop(username):
 @login_required
 def delete_dish(dish_id):
     dish = Dish.query.get_or_404(dish_id)
+    shop_id = dish.shop_id
     if current_user != dish.shop.user:
         abort(403)
     db.session.delete(dish)
     db.session.commit()
     flash('Dish deleted.', 'info')
-    return redirect_back()
+    return redirect(url_for('.index', shop_id=shop_id))
 
 
 @shop_bp.route('/upload/<int:shop_id>', methods=['GET', 'POST'])
@@ -151,6 +152,23 @@ def new_tag(dish_id):
                 dish.tags.append(tag)
                 db.session.commit()
         flash('Tag added.', 'success')
+
+    flash_errors(form)
+    return redirect(url_for('main.show_dish', dish_id=dish_id))
+
+
+@shop_bp.route('/dish/<int:dish_id>/description', methods=['POST'])
+@login_required
+def edit_description(dish_id):
+    dish = Dish.query.get_or_404(dish_id)
+    if current_user != dish.shop.user:
+        abort(403)
+
+    form = DescriptionForm()
+    if form.validate_on_submit():
+        dish.description = form.description.data
+        db.session.commit()
+        flash('Description updated.', 'success')
 
     flash_errors(form)
     return redirect(url_for('main.show_dish', dish_id=dish_id))
