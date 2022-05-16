@@ -9,6 +9,40 @@ from ygq.models import Message
 from ygq.wsgi import app
 
 
+def test_integration_chat(client):
+    message = Message(body='Test Message', author_id=1)
+    db.session.add(message)
+    db.session.commit()
+
+    # 用户user进入聊天室并发送一条消息
+    login(client)
+    rv = client.get(url_for('chat.home'))
+    assert b'Test Message' in rv.data
+    assert b'Hello, world!' not in rv.data
+
+    @app.login_manager.request_loader
+    def load_user_from_request(request):
+        return User.query.get(1)
+
+    socketio_client = socketio.test_client(current_app)
+    socketio_client.emit('new message', 'Hello, world!')
+
+    rv = client.get(url_for('chat.home'))
+    assert b'Test Message' in rv.data
+    assert b'Hello, world!' in rv.data
+    socketio_client.disconnect()
+
+    @app.login_manager.request_loader
+    def load_user_from_request(request):
+        pass
+
+    # 用户user2进入聊天室，接收到user1发送的消息
+    login(client, email='user2@youguoqi.com', password='123')
+    rv = client.get(url_for('chat.home'))
+    assert b'Test Message' in rv.data
+    assert b'Hello, world!' in rv.data
+
+
 def test_new_message_event(client):
     @app.login_manager.request_loader
     def load_user_from_request(request):

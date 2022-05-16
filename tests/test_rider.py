@@ -27,7 +27,6 @@ def test_finish_order(client):
     login(client, email='unconfirmed@youguoqi.com', password="123")
 
     rv = client.post(url_for('rider.finish_order', order_id=1), follow_redirects=True)
-    print(rv.data)
     assert rv.status_code == 200
     assert Order.query.get(1).is_finish
     assert Rider.query.get(2).income == 15
