@@ -19,7 +19,8 @@ def home(room_id):
     room = Room.query.get_or_404(room_id)
     amount = current_app.config['YGQ_MESSAGE_PER_PAGE']
     messages = Message.query.filter_by(room=room).order_by(Message.timestamp.asc())[-amount:]
-    return render_template('group/home.html', messages=messages, room=room.id, users=rooms(sid=room_id, namespace='/group'))
+    return render_template('group/home.html', messages=messages, room=room.id, room_name=room.name,
+                           users=rooms(sid=room_id, namespace='/group'))
 
 
 @group_bp.route('/messages/<int:room_id>', methods=['GET'])

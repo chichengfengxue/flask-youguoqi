@@ -1,6 +1,8 @@
 import pytest
+from flask import current_app
 
-from ygq import create_app, db, User, Dish, Shop, File, Comment, Tag, Order, Rider
+from ygq import create_app, db, User, Dish, Shop, File, Comment, Tag, Order, Rider, socketio
+from ygq.models import Message
 
 
 @pytest.fixture()
@@ -73,3 +75,7 @@ def runner():
 
     db.drop_all()
     context.pop()
+
+
+
+

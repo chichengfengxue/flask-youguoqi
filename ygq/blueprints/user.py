@@ -99,7 +99,7 @@ def follow(username):
 def start_group(username):
     """发起聊天"""
     user = User.query.filter_by(username=username).first_or_404()
-    room = Room(name=current_user.username+' 和 '+username+' 的聊天')
+    room = Room(name=current_user.username+' and '+username+' \'s group')
     db.session.add(room)
     db.session.commit()
     session['username'] = username
