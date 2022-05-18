@@ -1,5 +1,14 @@
+import os
+
 import pytest
 from flask import current_app
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoAlertPresentException
+import unittest, time, re
 
 from ygq import create_app, db, User, Dish, Shop, File, Comment, Tag, Order, Rider, socketio
 from ygq.models import Message
@@ -77,5 +86,36 @@ def runner():
     context.pop()
 
 
+@pytest.fixture(scope='session')
+def driver():
+    # os.environ['MOZ_HEADLESS'] = '1'
+    driver = webdriver.Firefox()
+    driver.implicitly_wait(5)  # 隐式等待
+
+    yield driver
+
+    # driver.quit()
+
+
+@pytest.fixture(scope='session')
+def driver2():
+    # os.environ['MOZ_HEADLESS'] = '1'
+    driver2 = webdriver.Firefox()
+    driver2.implicitly_wait(5)  # 隐式等待
+
+    yield driver2
+
+    # driver2.quit()
+
+
+@pytest.fixture(scope='function')
+def driver_fn():
+    # os.environ['MOZ_HEADLESS'] = '1'
+    driver_fn = webdriver.Firefox()
+    driver_fn.implicitly_wait(5)  # 隐式等待
+
+    yield driver_fn
+
+    # driver.quit()
 
 

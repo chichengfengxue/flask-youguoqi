@@ -3,7 +3,7 @@ from datetime import timedelta
 from flask import url_for
 
 from .extensions import db
-from .models import Notification
+from .models import Notification, Room
 
 
 def push_new_order_notification(order, receiver):
@@ -26,8 +26,9 @@ def push_delivered_notification(order):
 
 def push_new_group_notification(username, room_id, receiver):
     """新会话通知"""
-    message = '<a href="%s">%s</a> 邀请您加入<a href="%s"> 聊天 </a> !' % \
-              (url_for('user.index', username=username), username, url_for('group.home', room_id=room_id))
+    room = Room.query.get_or_404(room_id)
+    message = '<a href="%s">%s</a> 邀请您加入<a href="%s"> %s </a> !' % \
+              (url_for('user.index', username=username), username, url_for('group.home', room_id=room_id), room.name)
     notification = Notification(message=message, receiver=receiver)
     db.session.add(notification)
     db.session.commit()
@@ -35,7 +36,8 @@ def push_new_group_notification(username, room_id, receiver):
 
 def push_group_notification(room_id, receiver):
     """会话记录"""
-    message = '<a href="%s"> 聊天 </a> !' % (url_for('group.home', room_id=room_id))
+    room = Room.query.get_or_404(room_id)
+    message = '<a href="%s"> %s </a> !' % (url_for('group.home', room_id=room_id), room.name)
     notification = Notification(message=message, receiver=receiver)
     db.session.add(notification)
     db.session.commit()

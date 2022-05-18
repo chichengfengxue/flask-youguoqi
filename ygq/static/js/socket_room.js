@@ -72,7 +72,6 @@ $(document).ready(function () {
     socket.on('status', function(data) {
         $('.messages').append(data.message_html);
         flask_moment_render_all();
-        alert(data.message_html);
         scrollToBottom();
         activateSemantics();
     });
