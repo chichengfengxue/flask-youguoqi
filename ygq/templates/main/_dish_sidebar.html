@@ -61,7 +61,7 @@
                 <form class="inline" method="post"
                       action="{{ url_for('shop.delete_dish', dish_id=dish.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <button id="delete" type="submit" class="btn btn-outline-primary btn-sm">
                         <span class="oi oi-trash"></span> Delete
                     </button>
                 </form>
@@ -69,7 +69,7 @@
                 <form class="inline" method="post"
                       action="{{ url_for('user.buy', dish_id=dish.id) }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                    <button type="submit" class="btn btn-outline-primary btn-sm">
+                    <button id="buy" type="submit" class="btn btn-outline-primary btn-sm">
                         <span class="oi oi-cart"></span> Buy
                     </button>
                 </form>

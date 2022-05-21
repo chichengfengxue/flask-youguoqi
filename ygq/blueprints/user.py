@@ -49,7 +49,7 @@ def buy(dish_id):
         )
         db.session.add(order)
         db.session.commit()
-        flash('下单成功！', 'success')
+        flash('Successfully ordered!', 'success')
 
         push_new_order_notification(order, order.shop.user)
         return redirect(url_for('.show_order', order_id=order.id))

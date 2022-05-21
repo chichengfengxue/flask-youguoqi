@@ -94,7 +94,7 @@ def driver():
 
     yield driver
 
-    # driver.quit()
+    driver.quit()
 
 
 @pytest.fixture(scope='session')
@@ -105,7 +105,7 @@ def driver2():
 
     yield driver2
 
-    # driver2.quit()
+    driver2.quit()
 
 
 @pytest.fixture(scope='function')
@@ -116,6 +116,18 @@ def driver_fn():
 
     yield driver_fn
 
-    # driver.quit()
+    driver_fn.quit()
+
+
+users_list = [("leigong", "ksun@ligang.net"),
+              ("liujun", "akang@yahoo.com"),
+              ("gongjing", "yang57@gmail.com"),
+              ("lei83", "fshao@49.cn"),
+              ("kongyang", "weiwang@hotmail.com"),
+              ("wangwei", "jiawei@gmail.com"),
+              ("ming44", "kliu@ww.cn"),
+              ("jundong", "vzou@hotmail.com"),
+              ("pxia", "yang62@chengxiang.cn"),
+              ("xia67", "kxu@hotmail.com")]
 
 

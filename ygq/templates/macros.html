@@ -78,6 +78,6 @@
     <form class="inline" method="post"
                       action="{{ url_for('user.start_group', username=user.username) }}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button type="submit" class="btn btn-dark btn-sm">跟他聊天</button>
+        <button id="start chat" type="submit" class="btn btn-dark btn-sm">start chat</button>
     </form>
 {% endmacro %}

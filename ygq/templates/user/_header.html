@@ -28,6 +28,6 @@
     <ul class="nav nav-tabs">
         {{ render_nav_item('user.index', 'Orders', user.orders|length, username=user.username) }}
         {{ render_nav_item('user.show_collections', 'Collections', user.collections|length, username=user.username) }}
-        {{ render_nav_item('user.show_followers', 'Follower', user.followers.count() - 1, username=user.username) }}
+        {{ render_nav_item('user.show_followers', 'Following', user.following.count() - 1, username=user.username) }}
     </ul>
 </div>

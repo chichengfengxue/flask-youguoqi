@@ -42,6 +42,8 @@ def accept_delivery(order_id):
     order.rider = current_user.rider[0]
     db.session.commit()
     return '', 204
+    # flash('Successfully order!', 'success')
+    # return redirect(url_for('user.show_order', order_id=order.id))
 
 
 @socketio.on('new delivery', namespace='/delivery')
