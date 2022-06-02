@@ -7,7 +7,7 @@ from flask import current_app
 from sqlalchemy.exc import IntegrityError
 from datetime import timedelta
 from .extensions import db
-from .models import User, Dish, Tag, Comment, Order, File, Shop, Rider, Message
+from .models import User, Dish, Tag, Comment, Order, File, Shop, Rider, Message, Room
 from .notifications import push_new_order_notification, push_delivered_notification
 
 fake = Faker("zh_CN")
