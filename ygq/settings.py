@@ -87,21 +87,18 @@ class DevelopmentConfig(BaseConfig):
 #     SQLALCHEMY_DATABASE_URI = \
 #         prefix + os.path.join(basedir, 'data-dev.db')
 #     REDIS_URL = "redis://localhost"
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',
-                                    prefix + os.path.join(basedir, 'data.db'))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 class TestingConfig(BaseConfig):
     # TESTING = True
     # WTF_CSRF_ENABLED = False
     # SQLALCHEMY_DATABASE_URI = 'sqlite:///'  # in-memory database
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',
-                                    prefix + os.path.join(basedir, 'data.db'))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 class ProductionConfig(BaseConfig):
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL',
-                                        prefix + os.path.join(basedir, 'data.db'))
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 config = {
