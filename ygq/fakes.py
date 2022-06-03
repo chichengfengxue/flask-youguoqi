@@ -184,6 +184,6 @@ def fake_message(count=200):
     
 def fake_room(count=1):
     for i in range(count):
-        room = Room(id=0)
+        room = Room(id=1)
     db.session.add(room)
     db.session.commit()
