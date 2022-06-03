@@ -262,7 +262,7 @@ class Message(db.Model):
     author = db.relationship('User', back_populates='messages')
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
     dish = db.relationship('Dish', back_populates='messages')
-    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), default=0)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), default=1)
     room = db.relationship('Room', back_populates='messages')
 
 
