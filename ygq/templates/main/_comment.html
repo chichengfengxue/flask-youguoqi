@@ -11,7 +11,8 @@
                 <div class="comment-thumbnail">
                     <a href="{{ url_for('user.index', username=comment.author.username) }}">
                         <img class="rounded img-fluid avatar-s profile-popover"
-                             src="{{ url_for('main.get_avatar', filename=comment.author.avatar_m) }}">
+                             src="{{ comment.author.avatar_m }}">
+{#                             src="{{ url_for('main.get_avatar', filename=comment.author.avatar_m) }}">#}
                     </a>
                 </div>
                 <div class="comment-body">
@@ -70,7 +71,8 @@
             <div class="comment-form-area">
                 <div class="comment-form-thumbnail">
                     <img class="rounded img-fluid avatar-s"
-                         src="{{ url_for('main.get_avatar', filename=current_user.avatar_m) }}">
+                         src="{{ current_user.avatar_m }}">
+{#                         src="{{ url_for('main.get_avatar', filename=current_user.avatar_m) }}">#}
                 </div>
                 <div class="comment-form" id="comment-form">
                     {{ render_form(comment_form, action=url_for('.new_comment', dish_id=dish.id, page=pagination.pages or 1,

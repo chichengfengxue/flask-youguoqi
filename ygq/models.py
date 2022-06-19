@@ -1,6 +1,8 @@
 import os
 from datetime import datetime
 
+import cloudinary
+from cloudinary.uploader import upload
 from flask import current_app
 from flask_avatars import Identicon
 from flask_login import UserMixin
@@ -119,9 +121,13 @@ class User(db.Model, UserMixin):
         """生成随机头像文件"""
         avatar = Identicon()
         filenames = avatar.generate(text=self.username)
-        self.avatar_s = filenames[0]
-        self.avatar_m = filenames[1]
-        self.avatar_l = filenames[2]
+
+        filename_s, filetype = upload_cloudinary(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filenames[0]))
+        self.avatar_s = filename_s
+        filename_m, filetype = upload_cloudinary(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filenames[1]))
+        self.avatar_m = filename_m
+        filename_l, filetype = upload_cloudinary(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filenames[2]))
+        self.avatar_l = filename_l
         db.session.commit()
 
 
@@ -210,7 +216,6 @@ class Dish(db.Model):
     messages = db.relationship('Message', back_populates='dish', cascade='all')
 
 
-
 @whooshee.register_model('name')
 class Tag(db.Model):
     """商品标签"""
@@ -262,7 +267,7 @@ class Message(db.Model):
     author = db.relationship('User', back_populates='messages')
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
     dish = db.relationship('Dish', back_populates='messages')
-    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), default=0)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), default=1)
     room = db.relationship('Room', back_populates='messages')
 
 
@@ -285,3 +290,14 @@ def delete_dishes(**kwargs):
         path = os.path.join(current_app.config['YGQ_UPLOAD_PATH'], file.filename)
         if os.path.exists(path):  # not every filename map a unique file
             os.remove(path)
+
+
+def upload_cloudinary(file_to_upload):
+    cloudinary.config(cloud_name=os.getenv('CLOUD_NAME'), api_key=os.getenv('API_KEY'),
+                      api_secret=os.getenv('API_SECRET'))
+    upload_result = upload(file_to_upload)
+    file_url, options = cloudinary.utils.cloudinary_url(
+        upload_result['public_id'],
+        format=upload_result['format'],
+        crop="fill")
+    return file_url, upload_result['format']

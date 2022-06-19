@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, url_for, current_app, \
     send_from_directory, request, abort, Blueprint
+from flask_cors import cross_origin
 from flask_login import login_required, current_user
 from sqlalchemy.sql.expression import func
 
@@ -61,13 +62,17 @@ def show_notifications():
 
 
 @main_bp.route('/uploads/<path:filename>')
+@cross_origin()
 def get_image(filename):
-    return send_from_directory(current_app.config['YGQ_UPLOAD_PATH'], filename)
+    # return send_from_directory(current_app.config['YGQ_UPLOAD_PATH'], filename)
+    return filename
 
 
 @main_bp.route('/avatars/<path:filename>')
+@cross_origin()
 def get_avatar(filename):
-    return send_from_directory(current_app.config['AVATARS_SAVE_PATH'], filename)
+    # return send_from_directory(current_app.config['AVATARS_SAVE_PATH'], filename)
+    return filename
 
 
 @main_bp.route('/dish/<int:dish_id>')
@@ -77,7 +82,6 @@ def show_dish(dish_id):
     per_page = current_app.config['YGQ_COMMENT_PER_PAGE']
     pagination = Comment.query.with_parent(dish).order_by(Comment.timestamp.asc()).paginate(page, per_page)
     comments = pagination.items
-
     comment_form = CommentForm()
     description_form = DescriptionForm()
     tag_form = TagForm()

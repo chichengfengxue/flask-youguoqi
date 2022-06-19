@@ -39,7 +39,7 @@ def new_message(message_body, dish_id=None):
 @confirm_required
 def home():
     amount = current_app.config['YGQ_MESSAGE_PER_PAGE']
-    messages = Message.query.filter_by(room_id=0).order_by(Message.timestamp.asc())[-amount:]
+    messages = Message.query.filter_by(room_id=1).order_by(Message.timestamp.asc())[-amount:]
     return render_template('chat/home.html', messages=messages)
 
 
@@ -49,7 +49,7 @@ def home():
 def get_messages():
     """返回分页消息记录"""
     page = request.args.get('page', 1, type=int)
-    pagination = Message.query.filter_by(room_id=0).order_by(Message.timestamp.desc()).paginate(
+    pagination = Message.query.filter_by(room_id=1).order_by(Message.timestamp.desc()).paginate(
         page, per_page=current_app.config['YGQ_MESSAGE_PER_PAGE'])
     messages = pagination.items
     return render_template('chat/_messages.html', messages=messages[::-1])

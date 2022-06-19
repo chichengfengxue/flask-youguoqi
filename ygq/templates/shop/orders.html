@@ -13,7 +13,9 @@
                     {% if order.dish %}
                     <div>
                         <a class="navbar-brand" href="{{ url_for('user.show_order', order_id=order.id) }}">
-                            <img style="width: 5%" class="card-img-top portrait" src="{{ url_for('main.get_image', filename=order.dish.files[0].filename) }}">
+                            <img style="width: 5%" class="card-img-top portrait"
+                                 src="{{ order.dish.files[0].filename }}">
+{#                                 src="{{ url_for('main.get_image', filename=order.dish.files[0].filename) }}">#}
                             {{ order.dish.name }}--
                             <span class="oi oi-yen"></span>{{ order.dish.price }}*{{ order.number }}--
                             {% if order.is_prepared %}

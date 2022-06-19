@@ -44,7 +44,7 @@ class BaseConfig:
     YGQ_MESSAGE_PER_PAGE = 30
 
     # 图片上传
-    YGQ_UPLOAD_PATH = os.path.join(basedir, 'uploads')
+    YGQ_UPLOAD_PATH = os.path.join(basedir, 'tmp')
     YGQ_DISH_SIZE = {'small': 400, 'medium': 800}
     YGQ_DISH_SUFFIX = {
         YGQ_DISH_SIZE['small']: '_s',
@@ -64,7 +64,8 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # 头像上传
-    AVATARS_SAVE_PATH = os.path.join(YGQ_UPLOAD_PATH, 'avatars')
+    AVATARS_SAVE_PATH = os.path.join(YGQ_UPLOAD_PATH)
+    # AVATARS_SAVE_PATH = ""
     AVATARS_SIZE_TUPLE = (30, 100, 200)  # 小、中、大头像图片大小元组
 
     WHOOSHEE_MIN_STRING_LEN = 1  # 搜索关键字的最小字符数

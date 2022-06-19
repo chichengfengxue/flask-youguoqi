@@ -16,8 +16,8 @@ from .blueprints.user import user_bp
 from .blueprints.chat import chat_bp
 from .blueprints.group import group_bp
 
-from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio
-from .fakes import fake_delivery
+from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio, cors
+from .fakes import fake_delivery, fake_room
 from .models import User, Dish, Tag, Follow, Notification, Comment, Collect, Order, Rider, Shop, File
 from .settings import config
 
@@ -52,6 +52,7 @@ def register_extensions(app):
     avatars.init_app(app)
     csrf.init_app(app)
     socketio.init_app(app)
+    cors.init_app(app)
 
 
 def register_blueprints(app):
@@ -139,11 +140,12 @@ def register_commands(app):
     @click.option('--collect', default=50, help='Quantity of collects, default is 50.')
     @click.option('--comment', default=100, help='Quantity of comments, default is 100.')
     @click.option('--dish', default=100, help='Quantity of dishes, default is 100.')
-    @click.option('--order', default=100, help='Quantity of orders, default is 200.')
+    @click.option('--order', default=100, help='Quantity of orders, default is 100.')
     @click.option('--shop', default=20, help='Quantity of shops, default is 20.')
+    @click.option('--room', default=1, help='Quantity of rooms, default is 1.')
     @click.option('--message', default=200, help='Quantity of messages, default is 200.')
     @click.option('--delivery', default=100, help='Quantity of deliveries, default is 100.')
-    def forge(user, follow, tag, collect, comment, dish, order, shop, message, delivery):
+    def forge(user, follow, tag, collect, comment, dish, order, shop, message, delivery, room):
         """Generate fake data."""
 
         from .fakes import fake_shop, fake_comment, fake_follow, fake_tag, fake_user, \
@@ -168,6 +170,8 @@ def register_commands(app):
         fake_comment(comment)
         click.echo('Generating %d orders...' % order)
         fake_order(order)
+        click.echo('Generating %d rooms...' % room)
+        fake_room(room)
         click.echo('Generating %d messages...' % order)
         fake_message(message)
         click.echo('Generating %d deliveries...' % delivery)

@@ -1,13 +1,14 @@
 import os
 
 from flask import render_template, flash, redirect, url_for, current_app, request, Blueprint, abort
+from flask_cors import cross_origin
 from flask_login import login_required, current_user
 
 from ..decorators import confirm_required
 from ..extensions import db
 from ..forms.shop import DishForm, Apply2Shop, TagForm, DescriptionForm
 from ..models import User, Dish, Shop, File, Tag, Order
-from ..utils import redirect_back, rename_file, flash_errors, is_image
+from ..utils import redirect_back, rename_file, flash_errors, is_image, upload_cloudinary
 
 shop_bp = Blueprint('shop', __name__)
 
@@ -77,18 +78,21 @@ def delete_dish(dish_id):
 
 
 @shop_bp.route('/upload/<int:shop_id>', methods=['GET', 'POST'])
+@cross_origin()
 @login_required
 @confirm_required
 def upload(shop_id):
     shop = Shop.query.get_or_404(shop_id)
     if request.method == 'POST' and 'file' in request.files:
         f = request.files.get('file')
-        filename = rename_file(f.filename)
-        f.save(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename))
+        # filename = rename_file(f.filename)
+        # filename = os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename)
+        # f.save(filename)
+        filename, filetype = upload_cloudinary(f)
         file = File(
             filename=filename,
             user=shop.user,
-            is_img=is_image(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename))
+            is_img=is_image('.'+filetype)
         )
         db.session.add(file)
         db.session.commit()

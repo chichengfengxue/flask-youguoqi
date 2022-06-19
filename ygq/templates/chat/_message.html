@@ -2,7 +2,8 @@
     <div class="picture">
         <a href="{{ url_for('user.index', username=message.author.username) }}" >
             <img class="pop-card" data-position="right center" data-offset="-40"
-                 src="{{ url_for('main.get_avatar', filename=message.author.avatar_s) }}">
+                 src="{{ current_user.avatar_s }}">
+{#                 src="{{ url_for('main.get_avatar', filename=message.author.avatar_s) }}">#}
         </a>
     </div>
     <div class="msg" >

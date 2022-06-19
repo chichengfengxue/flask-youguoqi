@@ -18,8 +18,14 @@
             </small>
         </div>
         <div class="card-body">
-            {{ avatars.crop_box('main.get_avatar', current_user.avatar_raw) }}
-            {{ avatars.preview_box('main.get_avatar', current_user.avatar_raw) }}
+{#            {{ avatars.crop_box('main.get_avatar', current_user.avatar_raw) }}#}
+            <img src="{{ current_user.avatar_raw }}" id="crop-box" style="max-width: 500px; display: block;">
+{#            {{ avatars.preview_box('main.get_avatar', current_user.avatar_raw) }}#}
+            <div id="preview-box">
+                <div class="preview-box" style="width: 100px; height: 100px; overflow: hidden;">
+                    <img src="{{ current_user.avatar_raw }}" class="jcrop-preview" alt="Preview"/>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             {{ render_form(crop_form, action=url_for('.crop_avatar')) }}

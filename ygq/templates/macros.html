@@ -2,7 +2,9 @@
     <div class="photo-card card">
         {% if dish.files %}
         <a class="card-thumbnail" href="{{ url_for('main.show_dish', dish_id=dish.id) }}">
-            <img class="card-img-top portrait" src="{{ url_for('main.get_image', filename=dish.files[0].filename) }}">
+            <img class="card-img-top portrait"
+                 src="{{ dish.files[0].filename }}">
+                 src="{{ url_for('main.get_image', filename=dish.files[0].filename) }}">
         </a>
         {% endif %}
         <div class="card-body">
@@ -18,7 +20,9 @@
 {% macro order_card(order) %}
     <div class="photo-card card">
         <a class="card-thumbnail" href="{{ url_for('user.show_order', order_id=order.id) }}">
-            <img class="card-img-top portrait" src="{{ url_for('main.get_image', filename=order.dish.files[0].filename) }}">
+            <img class="card-img-top portrait"
+                 src="{{ order.dish.files[0].filename }}">
+{#                 src="{{ url_for('main.get_image', filename=order.dish.files[0].filename) }}">#}
         </a>
         <div class="card-body">
             <div>
@@ -33,7 +37,9 @@
 {% macro user_card(user) %}
     <div class="user-card text-center">
         <a href="{{ url_for('user.index', username=user.username) }}">
-            <img class="rounded avatar-m" src="{{ url_for('main.get_avatar', filename=user.avatar_m) }}">
+            <img class="rounded avatar-m"
+                 src="{{ current_user.avatar_m }}">
+{#                 src="{{ url_for('main.get_avatar', filename=user.avatar_m) }}">#}
         </a>
         <h6>
             <a href="{{ url_for('user.index', username=user.username) }}">{{ user.name }}</a>

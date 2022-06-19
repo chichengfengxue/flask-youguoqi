@@ -5,7 +5,8 @@
         <div class="row">
             <a href="{{ url_for('user.index', username=dish.shop.user.username) }}">
                 <img class="sidebar-avatar rounded avatar-m"
-                     src="{{ url_for('main.get_avatar', filename=dish.shop.user.avatar_m) }}">
+                     src="{{ dish.shop.user.avatar_m }}">
+{#                     src="{{ url_for('main.get_avatar', filename=dish.shop.user.avatar_m) }}">#}
             </a>
             <div class="sidebar-profile">
                 <h6 class="card-title">
