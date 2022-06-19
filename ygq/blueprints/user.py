@@ -1,4 +1,7 @@
+import os
+
 from flask import render_template, flash, redirect, url_for, current_app, request, Blueprint, abort, session
+from flask_cors import cross_origin
 from flask_login import login_required, current_user, fresh_login_required
 from flask_socketio import rooms
 
@@ -10,7 +13,8 @@ from ..forms.user import EditProfileForm, UploadAvatarForm, CropAvatarForm, Chan
 from ..models import User, Rider, Dish, Order, Collect, Room
 from ..notifications import push_new_order_notification, push_new_group_notification, push_group_notification
 from ..settings import Operations
-from ..utils import generate_token, validate_token, redirect_back, flash_errors
+from ..utils import generate_token, validate_token, redirect_back, flash_errors, upload_cloudinary, rename_file, \
+    crop_img
 from sqlalchemy.sql.expression import func
 from datetime import datetime, timedelta
 
@@ -163,13 +167,21 @@ def change_avatar():
 
 
 @user_bp.route('/settings/avatar/upload', methods=['POST'])
+@cross_origin()
 @login_required
 @confirm_required
 def upload_avatar():
     form = UploadAvatarForm()
     if form.validate_on_submit():
         image = form.image.data
-        filename = avatars.save_avatar(image)
+        # filename = avatars.save_avatar(image)
+
+        filename = rename_file(image.filename)
+        image.save(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename))
+        current_user.avatar_s = os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename)
+        db.session.commit()
+
+        filename, filetype = upload_cloudinary(os.path.join(current_app.config['YGQ_UPLOAD_PATH'], filename))
         current_user.avatar_raw = filename
         db.session.commit()
         flash('Image uploaded, please crop.', 'success')
@@ -187,10 +199,12 @@ def crop_avatar():
         y = form.y.data
         w = form.w.data
         h = form.h.data
-        filenames = avatars.crop_avatar(current_user.avatar_raw, x, y, w, h)
+        filenames = crop_img(current_user.avatar_s, x, y, w, h)
+
         current_user.avatar_s = filenames[0]
         current_user.avatar_m = filenames[1]
         current_user.avatar_l = filenames[2]
+
         db.session.commit()
         flash('Avatar updated.', 'success')
     flash_errors(form)

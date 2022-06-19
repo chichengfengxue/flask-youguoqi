@@ -16,7 +16,9 @@ from .blueprints.user import user_bp
 from .blueprints.chat import chat_bp
 from .blueprints.group import group_bp
 
-from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio
+
+from .extensions import bootstrap, db, login_manager, mail, dropzone, moment, whooshee, avatars, csrf, socketio, cors
+
 from .fakes import fake_delivery, fake_room
 from .models import User, Dish, Tag, Follow, Notification, Comment, Collect, Order, Rider, Shop, File
 from .settings import config
@@ -52,6 +54,7 @@ def register_extensions(app):
     avatars.init_app(app)
     csrf.init_app(app)
     socketio.init_app(app)
+    cors.init_app(app)
 
 
 def register_blueprints(app):

@@ -1,6 +1,9 @@
+import mimetypes
 import os
 import uuid
 import filetype
+import cloudinary
+from cloudinary.uploader import upload
 from bleach import clean, linkify
 from markdown import markdown
 
@@ -16,14 +19,56 @@ from flask import current_app, request, url_for, redirect, flash
 from itsdangerous import BadSignature, SignatureExpired
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 
-from .extensions import db
+from .extensions import db, avatars
 from .models import User
 from .settings import Operations
 
 
-def is_image(filename):
-    kind = filetype.guess(filename)
-    return kind.mime.split('/')[0] == 'image'
+def is_image(filetype):
+    kind = mimetypes.types_map[filetype]
+    return kind.split('/')[0] == 'image'
+
+
+def upload_cloudinary(file_to_upload):
+    cloudinary.config(cloud_name=os.getenv('CLOUD_NAME'), api_key=os.getenv('API_KEY'),
+                      api_secret=os.getenv('API_SECRET'))
+    upload_result = upload(file_to_upload)
+    file_url, options = cloudinary.utils.cloudinary_url(
+        upload_result['public_id'],
+        format=upload_result['format'],
+        crop="fill")
+    return file_url, upload_result['format']
+
+
+def crop_img(filename, x, y, w, h):
+    x = int(x)
+    y = int(y)
+    w = int(w)
+    h = int(h)
+
+    sizes = current_app.config['AVATARS_SIZE_TUPLE']
+
+    raw_img = Image.open(filename)
+
+    base_width = current_app.config['AVATARS_CROP_BASE_WIDTH']
+
+    if raw_img.size[0] >= base_width:
+        raw_img = avatars.resize_avatar(raw_img, base_width=base_width)
+
+    cropped_img = raw_img.crop((x, y, x + w, y + h))
+
+    avatar_s = avatars.resize_avatar(cropped_img, base_width=sizes[0])
+    avatar_m = avatars.resize_avatar(cropped_img, base_width=sizes[1])
+    avatar_l = avatars.resize_avatar(cropped_img, base_width=sizes[2])
+
+    avatar_s.save(filename, optimize=True, quality=85)
+    filename_s, filetype = upload_cloudinary(filename)
+    avatar_m.save(filename, optimize=True, quality=85)
+    filename_m, filetype = upload_cloudinary(filename)
+    avatar_l.save(filename, optimize=True, quality=85)
+    filename_l, filetype = upload_cloudinary(filename)
+
+    return [filename_s, filename_m, filename_l]
 
 
 def generate_token(user, operation, expire_in=None, **kwargs):

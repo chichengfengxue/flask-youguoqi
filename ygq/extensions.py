@@ -1,5 +1,6 @@
 from flask_avatars import Avatars
 from flask_bootstrap import Bootstrap
+from flask_cors import CORS
 from flask_dropzone import Dropzone
 from flask_login import LoginManager, AnonymousUserMixin
 from flask_mail import Mail
@@ -20,6 +21,7 @@ whooshee = Whooshee()
 avatars = Avatars()
 csrf = CSRFProtect()
 socketio = SocketIO()
+cors = CORS()
 
 
 @login_manager.user_loader

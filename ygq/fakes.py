@@ -9,6 +9,7 @@ from datetime import timedelta
 from .extensions import db
 from .models import User, Dish, Tag, Comment, Order, File, Shop, Rider, Message, Room
 from .notifications import push_new_order_notification, push_delivered_notification
+from .utils import upload_cloudinary
 
 fake = Faker("zh_CN")
 
@@ -75,6 +76,8 @@ def fake_dish(count=100):
         r = lambda: random.randint(128, 255)
         img = Image.new(mode='RGB', size=(800, 800), color=(r(), r(), r()))
         img.save(os.path.join(upload_path, filename))
+        filename, filetype = upload_cloudinary(os.path.join(upload_path, filename))
+
         file = File(
             filename=filename,
             is_use=True,
@@ -181,7 +184,7 @@ def fake_message(count=200):
         )
     db.session.add(message)
     db.session.commit()
-    
+
 def fake_room(count=1):
     for i in range(count):
         room = Room(id=1)
