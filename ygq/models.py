@@ -226,7 +226,7 @@ class Tag(db.Model):
 
 class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(64))
+    filename = db.Column(db.String(128))
     dish_id = db.Column(db.Integer, db.ForeignKey('dish.id'))
     dish = db.relationship('Dish', back_populates='files')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
