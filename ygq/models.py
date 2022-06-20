@@ -44,10 +44,10 @@ class User(db.Model, UserMixin):
     tel = db.Column(db.String(20), unique=True)
     location_x = db.Column(db.Integer)
     location_y = db.Column(db.Integer)
-    avatar_s = db.Column(db.String(64))
-    avatar_m = db.Column(db.String(64))
-    avatar_l = db.Column(db.String(64))
-    avatar_raw = db.Column(db.String(64))  # 头像原图
+    avatar_s = db.Column(db.String(128))
+    avatar_m = db.Column(db.String(128))
+    avatar_l = db.Column(db.String(128))
+    avatar_raw = db.Column(db.String(128))  # 头像原图
 
     confirmed = db.Column(db.Boolean, default=False)
 
