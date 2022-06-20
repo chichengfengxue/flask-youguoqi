@@ -4,7 +4,7 @@
         <a class="card-thumbnail" href="{{ url_for('main.show_dish', dish_id=dish.id) }}">
             <img class="card-img-top portrait"
                  src="{{ dish.files[0].filename }}">
-                 src="{{ url_for('main.get_image', filename=dish.files[0].filename) }}">
+<!--                  src="{{ url_for('main.get_image', filename=dish.files[0].filename) }}"> -->
         </a>
         {% endif %}
         <div class="card-body">
