@@ -37,7 +37,7 @@ def upload_cloudinary(file_to_upload):
         upload_result['public_id'],
         format=upload_result['format'],
         crop="fill")
-    return file_url, upload_result['format']
+    return upload_result['url'], upload_result['format']
 
 
 def crop_img(filename, x, y, w, h):
