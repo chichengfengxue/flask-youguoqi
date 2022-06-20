@@ -32,7 +32,7 @@ def is_image(filetype):
 def upload_cloudinary(file_to_upload):
     cloudinary.config(cloud_name=os.getenv('CLOUD_NAME'), api_key=os.getenv('API_KEY'),
                       api_secret=os.getenv('API_SECRET'))
-    upload_result = upload(file_to_upload)
+    upload_result = upload(file_to_upload, resource_type="auto")
     file_url, options = cloudinary.utils.cloudinary_url(
         upload_result['public_id'],
         format=upload_result['format'],
