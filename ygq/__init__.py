@@ -4,7 +4,6 @@ import click
 from flask import Flask, render_template
 from flask_login import current_user
 from flask_wtf.csrf import CSRFError
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 # from .blueprints.admin import admin_bp
 # from .blueprints.ajax import ajax_bp
@@ -33,7 +32,6 @@ def create_app(config_name=None):
     app.jinja_env.trim_blocks = True
     app.jinja_env.lstrip_blocks = True
     app.config.from_object(config[config_name])
-    app.wsgi_app = ProxyFix(app.wsgi_app)
 
     register_extensions(app)
     register_blueprints(app)
