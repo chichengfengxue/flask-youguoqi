@@ -1,6 +1,6 @@
 # 有锅气
 
-> 项目demo：ccfx.pythonanywhere.com
+> 项目demo：[ccfx.pythonanywhere.com](http://ccfx.pythonanywhere.com)
 > 
 > **项目进度：**
 >
